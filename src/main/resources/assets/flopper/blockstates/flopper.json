@@ -1,0 +1,19 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "transform": "forge:default-block",
+    "textures": {
+      "particle": "flopper:blocks/flopper_outside",
+      "top": "flopper:blocks/flopper_top",
+      "side": "flopper:blocks/flopper_outside",
+      "inside": "flopper:blocks/flopper_inside"
+    }
+  },
+  "variants": {
+    "facing=down": { "model": "hopper_down" },
+    "facing=north": { "model": "hopper_side" },
+    "facing=south": { "model": "hopper_side", "y": 180 },
+    "facing=west": { "model": "hopper_side", "y": 270 },
+    "facing=east": { "model": "hopper_side", "y": 90 }
+  }
+}
