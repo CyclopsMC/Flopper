@@ -1,5 +1,7 @@
 package org.cyclops.flopper.block;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.cyclops.cyclopscore.config.ConfigurableProperty;
 import org.cyclops.cyclopscore.config.ConfigurableTypeCategory;
 import org.cyclops.cyclopscore.config.extendedconfig.BlockContainerConfig;
@@ -93,6 +95,7 @@ public class BlockFlopperConfig extends BlockContainerConfig {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void onRegistered() {
         super.onRegistered();
         if (renderFluid) {
