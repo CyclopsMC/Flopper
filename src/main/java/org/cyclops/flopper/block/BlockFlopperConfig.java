@@ -64,10 +64,16 @@ public class BlockFlopperConfig extends BlockContainerConfig {
     public static boolean worldPullPushNeighbourEvents = true;
 
     /**
-     * The number of ticks each flopper should sleep after doing work.
+     * The number of ticks each flopper should sleep after interacting with tanks.
      */
-    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "The number of ticks each flopper should sleep after doing work.", isCommandable = true)
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "The number of ticks each flopper should sleep after interacting with tanks", isCommandable = true)
     public static int workCooldown = 8;
+
+    /**
+     * The number of ticks each flopper should sleep after picking up or placing fluids.
+     */
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "The number of ticks each flopper should sleep after picking up or placing fluids.", isCommandable = true)
+    public static int workWorldCooldown = 20;
 
     /**
      * If the contained fluid should be rendered.

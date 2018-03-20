@@ -89,22 +89,24 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
             if (!this.isOnTransferCooldown() && BlockHelpers.getSafeBlockStateProperty(
                     getWorld().getBlockState(getPos()), BlockFlopper.ENABLED, false)) {
                 boolean worked = false;
+                boolean workedWorld = false;
 
                 // Push fluids
                 if (!this.tank.isEmpty()) {
                     worked = (BlockFlopperConfig.pushFluidRate > 0 && this.pushFluidsToTank())
-                            || (BlockFlopperConfig.pushFluidsWorld && this.pushFluidsToWorld());
+                            || (workedWorld = (BlockFlopperConfig.pushFluidsWorld && this.pushFluidsToWorld()));
                 }
 
                 // Pull fluids
                 if (!this.tank.isFull()) {
                     worked = (BlockFlopperConfig.pullFluidRate > 0 && pullFluidsFromTank())
-                            || (BlockFlopperConfig.pullFluidsWorld && this.pullFluidsFromWorld())
+                            || (workedWorld = (BlockFlopperConfig.pullFluidsWorld && this.pullFluidsFromWorld()) || workedWorld)
                             || worked;
                 }
 
                 if (worked) {
-                    this.setTransferCooldown(BlockFlopperConfig.workCooldown);
+                    this.setTransferCooldown(workedWorld
+                            ? BlockFlopperConfig.workWorldCooldown : BlockFlopperConfig.workCooldown);
                     this.markDirty();
                     return true;
                 }
