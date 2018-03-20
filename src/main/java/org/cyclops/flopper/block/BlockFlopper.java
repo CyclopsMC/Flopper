@@ -23,6 +23,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
@@ -30,6 +32,8 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.cyclops.cyclopscore.block.property.BlockProperty;
@@ -82,6 +86,7 @@ public class BlockFlopper extends ConfigurableBlockContainer {
 
     public BlockFlopper(ExtendedConfig<BlockConfig> eConfig) {
         super(eConfig, Material.IRON, TileFlopper.class);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Override
@@ -250,15 +255,17 @@ public class BlockFlopper extends ConfigurableBlockContainer {
                 }
                 return true;
             } else {
-                if (FluidUtil.tryEmptyContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {
-                    // Move fluid from the item into the tank
+                if (!player.isSneaking()
+                        && FluidUtil.tryEmptyContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {
+                    // Move fluid from the item into the tank if not sneaking
                     ItemStack drainedItem = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, true).getResult();
                     if (!player.capabilities.isCreativeMode) {
                         InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
                     }
                     return true;
-                } else if (FluidUtil.tryFillContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {
-                    // Move fluid from the tank into the item
+                } else if (player.isSneaking()
+                        && FluidUtil.tryFillContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {
+                    // Move fluid from the tank into the item if sneaking
                     FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, true);
                     if (result.isSuccess()) {
                         ItemStack filledItem = result.getResult();
@@ -271,6 +278,16 @@ public class BlockFlopper extends ConfigurableBlockContainer {
             }
         }
         return false;
+    }
+
+    @SubscribeEvent
+    public void onRightClick(PlayerInteractEvent.RightClickBlock event) {
+        // Force allow shift-right clicking with a fluid container passing through to this block
+        if (!event.getItemStack().isEmpty()
+                && event.getWorld().getBlockState(event.getPos()).getBlock() == this
+                && event.getItemStack().hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
+            event.setUseBlock(Event.Result.ALLOW);
+        }
     }
 
 }
