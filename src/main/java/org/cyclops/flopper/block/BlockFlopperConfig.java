@@ -54,13 +54,13 @@ public class BlockFlopperConfig extends BlockContainerConfig {
     /**
      * If sounds should be placed when placing or picking up fluids to/from the world.
      */
-    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If sounds should be placed when placing or picking up fluids to/from the world.", isCommandable = true)
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "If sounds should be placed when placing or picking up fluids to/from the world.", isCommandable = true)
     public static boolean worldPullPushSounds = true;
 
     /**
      * If neighbour-change events should be triggered when placing or picking up fluids to/from the world.
      */
-    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If neighbour-change events should be triggered when placing or picking up fluids to/from the world.", isCommandable = true)
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "If neighbour-change events should be triggered when placing or picking up fluids to/from the world.", isCommandable = true)
     public static boolean worldPullPushNeighbourEvents = true;
 
     /**
@@ -78,13 +78,13 @@ public class BlockFlopperConfig extends BlockContainerConfig {
     /**
      * If the contained fluid should be rendered.
      */
-    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If the contained fluid should be rendered.", isCommandable = true, requiresMcRestart = true)
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "If the contained fluid should be rendered.", isCommandable = true, requiresMcRestart = true)
     public static boolean renderFluid = true;
 
     /**
      * If the collision boxes should be made smaller to allow clicking behind the flopper.
      */
-    @ConfigurableProperty(category = ConfigurableTypeCategory.CORE, comment = "If the collision boxes should be made smaller to allow clicking behind the flopper.", isCommandable = true)
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "If the collision boxes should be made smaller to allow clicking behind the flopper.", isCommandable = true)
     public static boolean narrowCollision = true;
 
     /**
