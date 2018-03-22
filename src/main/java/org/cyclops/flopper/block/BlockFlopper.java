@@ -31,7 +31,6 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -243,17 +242,19 @@ public class BlockFlopper extends ConfigurableBlockContainer {
         if (fluidHandler != null) {
             ItemStack itemStack = player.getHeldItem(hand);
             if (itemStack.isEmpty()) {
-                // If the hand is empty, show the tank contents
-                FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, false);
-                if (fluidStack == null) {
-                    player.sendStatusMessage(new TextComponentString("0 / "
-                            + String.format("%,d", fluidHandler.getTankProperties()[0].getCapacity())), true);
-                } else {
-                    player.sendStatusMessage(new TextComponentString(fluidStack.getLocalizedName() + ": "
-                            + String.format("%,d", fluidStack.amount) + " / "
-                            + String.format("%,d", fluidHandler.getTankProperties()[0].getCapacity())), true);
+                if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
+                    // If the hand is empty, show the tank contents
+                    FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, false);
+                    if (fluidStack == null) {
+                        player.sendStatusMessage(new TextComponentString("0 / "
+                                + String.format("%,d", fluidHandler.getTankProperties()[0].getCapacity())), true);
+                    } else {
+                        player.sendStatusMessage(new TextComponentString(fluidStack.getLocalizedName() + ": "
+                                + String.format("%,d", fluidStack.amount) + " / "
+                                + String.format("%,d", fluidHandler.getTankProperties()[0].getCapacity())), true);
+                    }
+                    return true;
                 }
-                return true;
             } else {
                 if (!player.isSneaking()
                         && FluidUtil.tryEmptyContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {

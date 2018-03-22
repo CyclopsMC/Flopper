@@ -88,6 +88,12 @@ public class BlockFlopperConfig extends BlockContainerConfig {
     public static boolean narrowCollision = true;
 
     /**
+     * If a status message with the flopper contents should be shown to the player on right click without an item.
+     */
+    @ConfigurableProperty(category = ConfigurableTypeCategory.MACHINE, comment = "If a status message with the flopper contents should be shown to the player on right click without an item.", isCommandable = true)
+    public static boolean showContentsStatusMessageOnClick = true;
+
+    /**
      * Make a new instance.
      */
     public BlockFlopperConfig() {
