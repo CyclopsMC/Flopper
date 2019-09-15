@@ -1,284 +1,201 @@
 package org.cyclops.flopper.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.pathfinding.PathType;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IEnviromentBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.common.eventhandler.Event;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.cyclops.cyclopscore.block.property.BlockProperty;
-import org.cyclops.cyclopscore.config.configurable.ConfigurableBlockContainer;
-import org.cyclops.cyclopscore.config.extendedconfig.BlockConfig;
-import org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfig;
+import org.cyclops.cyclopscore.block.BlockTile;
+import org.cyclops.cyclopscore.helper.FluidHelpers;
 import org.cyclops.cyclopscore.helper.InventoryHelpers;
+import org.cyclops.cyclopscore.helper.L10NHelpers;
 import org.cyclops.cyclopscore.helper.TileHelpers;
+import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity;
 import org.cyclops.flopper.tileentity.TileFlopper;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Fluid hopper block.
  * @author rubensworks
  */
-public class BlockFlopper extends ConfigurableBlockContainer {
+public class BlockFlopper extends BlockTile {
 
-    @BlockProperty
-    public static final PropertyDirection FACING = PropertyDirection.create("facing", side -> side != EnumFacing.UP);
-    @BlockProperty(ignore = true)
-    public static final PropertyBool ENABLED = PropertyBool.create("enabled");
+    public static final DirectionProperty FACING = BlockStateProperties.FACING_EXCEPT_UP;
+    public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
-    // Collision boxes
-    protected static final AxisAlignedBB BASE_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D);
-    protected static final AxisAlignedBB SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.125D);
-    protected static final AxisAlignedBB NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.875D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB WEST_AABB = new AxisAlignedBB(0.875D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.125D, 1.0D, 1.0D);
-
-    // Ray trace boxes
-    protected static final AxisAlignedBB COL_TOP_AABB = new AxisAlignedBB(0.0D, 0.625D, 0.0D, 1.0D, 1.0D, 1.0D);
-    protected static final AxisAlignedBB COL_MIDDLE_AABB = new AxisAlignedBB(0.25D, 0.25D, 0.25D, 0.75D, 0.625D, 0.75D);
-    protected static final AxisAlignedBB COL_SOUTH_AABB = new AxisAlignedBB(0.375D, 0.25D, 0.75D, 0.625D, 0.5D, 1D);
-    protected static final AxisAlignedBB COL_NORTH_AABB = new AxisAlignedBB(0.375D, 0.25D, 0.0D, 0.625D, 0.5D, 0.25D);
-    protected static final AxisAlignedBB COL_WEST_AABB = new AxisAlignedBB(0.0D, 0.25D, 0.375D, 0.25D, 0.5D, 0.625D);
-    protected static final AxisAlignedBB COL_EAST_AABB = new AxisAlignedBB(0.75D, 0.25D, 0.375D, 1.0D, 0.5D, 0.625D);
-    protected static final AxisAlignedBB COL_DOWN_AABB = new AxisAlignedBB(0.375D, 0.0D, 0.375D, 0.625D, 0.25D, 0.625D);
-
-    private static BlockFlopper _instance = null;
-
-    /**
-     * Get the unique instance.
-     * @return The instance.
-     */
-    public static BlockFlopper getInstance() {
-        return _instance;
-    }
-
-    public BlockFlopper(ExtendedConfig<BlockConfig> eConfig) {
-        super(eConfig, Material.IRON, TileFlopper.class);
+    public BlockFlopper(Properties properties, Supplier<CyclopsTileEntity> tileEntitySupplier) {
+        super(properties, tileEntitySupplier);
         MinecraftForge.EVENT_BUS.register(this);
+        this.setDefaultState(this.stateContainer.getBaseState()
+                .with(FACING, Direction.DOWN)
+                .with(ENABLED, true));
     }
 
     @Override
-    public boolean isKeepNBTOnDrop() {
-        return false;
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING, ENABLED);
     }
 
     @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return FULL_BLOCK_AABB;
+    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+        return Blocks.HOPPER.getShape(state, worldIn, pos, context);
     }
 
     @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, BASE_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, EAST_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, WEST_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, SOUTH_AABB);
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, NORTH_AABB);
-    }
-
-    @Nullable
-    @Override
-    @SuppressWarnings("deprecation")
-    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
-        if (BlockFlopperConfig.narrowCollision) {
-            RayTraceResult result;
-
-            if ((result = rayTrace(pos, start, end, COL_TOP_AABB)) != null) {
-                return result;
-            }
-            if ((result = rayTrace(pos, start, end, COL_MIDDLE_AABB)) != null) {
-                return result;
-            }
-
-            EnumFacing facing = blockState.getValue(FACING);
-            AxisAlignedBB aabb = null;
-            switch (facing) {
-                case EAST:
-                    aabb = COL_EAST_AABB;
-                    break;
-                case WEST:
-                    aabb = COL_WEST_AABB;
-                    break;
-                case SOUTH:
-                    aabb = COL_SOUTH_AABB;
-                    break;
-                case NORTH:
-                    aabb = COL_NORTH_AABB;
-                    break;
-                case DOWN:
-                    aabb = COL_DOWN_AABB;
-                    break;
-            }
-
-            if (aabb != null && (result = rayTrace(pos, start, end, aabb)) != null) {
-                return result;
-            }
-
-            return null;
-        }
-        return super.collisionRayTrace(blockState, worldIn, pos, start, end);
+    public VoxelShape getRaytraceShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
+        return Blocks.HOPPER.getRaytraceShape(state, worldIn, pos);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ,
-                                            int meta, EntityLivingBase placer, EnumHand hand) {
-        EnumFacing enumfacing = facing.getOpposite();
-        if (enumfacing == EnumFacing.UP) {
-            enumfacing = EnumFacing.DOWN;
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        Direction direction = context.getFace().getOpposite();
+        if (direction == Direction.UP) {
+            direction = Direction.DOWN;
         }
-        return this.getDefaultState().withProperty(FACING, enumfacing).withProperty(ENABLED, true);
+        return this.getDefaultState()
+                .with(FACING, direction)
+                .with(ENABLED, true);
     }
 
     @Override
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-        this.updateState(worldIn, pos, state);
+    public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+        if (oldState.getBlock() != state.getBlock()) {
+            this.updateState(worldIn, pos, state);
+        }
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+    public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
         this.updateState(worldIn, pos, state);
     }
 
-    private void updateState(World worldIn, BlockPos pos, IBlockState state) {
+    private void updateState(World worldIn, BlockPos pos, BlockState state) {
         boolean notPowered = !worldIn.isBlockPowered(pos);
-        if (notPowered != state.getValue(ENABLED)) {
-            worldIn.setBlockState(pos, state.withProperty(ENABLED, notPowered), 4);
+        if (notPowered != state.get(ENABLED)) {
+            worldIn.setBlockState(pos, state.with(ENABLED, notPowered), 4);
         }
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public boolean isTopSolid(IBlockState state) {
+    public BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.MODEL;
+    }
+
+    @Override
+    public boolean doesSideBlockRendering(BlockState state, IEnviromentBlockReader world, BlockPos pos, Direction face) {
         return true;
     }
 
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.MODEL;
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    @SuppressWarnings("deprecation")
-    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
-        return true;
-    }
-
-    @SideOnly(Side.CLIENT)
     @Override
     public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.CUTOUT_MIPPED;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public IBlockState withRotation(IBlockState state, Rotation rot) {
-        return state.withProperty(FACING, rot.rotate(state.getValue(FACING)));
+    public BlockState rotate(BlockState state, Rotation rot) {
+        return state.with(FACING, rot.rotate(state.get(FACING)));
+    }
+
+    public BlockState mirror(BlockState state, Mirror mirrorIn) {
+        return state.rotate(mirrorIn.toRotation(state.get(FACING)));
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-        return state.withRotation(mirrorIn.toRotation(state.getValue(FACING)));
+    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+        return false;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
-        return face == EnumFacing.UP ? BlockFaceShape.BOWL : BlockFaceShape.UNDEFINED;
-    }
-
-    @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-        if (super.onBlockActivated(world, pos, state, player, hand, side, hitX, hitY, hitZ)) {
+    public boolean onBlockActivated(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
+        if (super.onBlockActivated(blockState, world, blockPos, player, hand, rayTraceResult)) {
             return true;
         }
-        IFluidHandler fluidHandler = TileHelpers.getCapability(world, pos, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
-        if (fluidHandler != null) {
-            ItemStack itemStack = player.getHeldItem(hand);
-            if (itemStack.isEmpty()) {
-                if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
-                    // If the hand is empty, show the tank contents
-                    FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, false);
-                    if (fluidStack == null) {
-                        player.sendStatusMessage(new TextComponentString("0 / "
-                                + String.format("%,d", fluidHandler.getTankProperties()[0].getCapacity())), true);
+        return TileHelpers.getCapability(world, blockPos, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+                .map(fluidHandler -> {
+                    ItemStack itemStack = player.getHeldItem(hand);
+                    if (itemStack.isEmpty()) {
+                        if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
+                            // If the hand is empty, show the tank contents
+                            FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
+                            if (fluidStack.isEmpty()) {
+                                player.sendStatusMessage(new StringTextComponent("0 / "
+                                        + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
+                            } else {
+                                player.sendStatusMessage(new StringTextComponent(L10NHelpers.localize(fluidStack.getTranslationKey()) + ": "
+                                        + String.format("%,d", fluidStack.getAmount()) + " / "
+                                        + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
+                            }
+                            return true;
+                        }
                     } else {
-                        player.sendStatusMessage(new TextComponentString(fluidStack.getLocalizedName() + ": "
-                                + String.format("%,d", fluidStack.amount) + " / "
-                                + String.format("%,d", fluidHandler.getTankProperties()[0].getCapacity())), true);
-                    }
-                    return true;
-                }
-            } else {
-                if (!player.isSneaking()
-                        && FluidUtil.tryEmptyContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {
-                    // Move fluid from the item into the tank if not sneaking
-                    ItemStack drainedItem = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, true).getResult();
-                    if (!player.capabilities.isCreativeMode) {
-                        InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
-                    }
-                    return true;
-                } else if (player.isSneaking()
-                        && FluidUtil.tryFillContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, false).isSuccess()) {
-                    // Move fluid from the tank into the item if sneaking
-                    FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, Fluid.BUCKET_VOLUME, player, true);
-                    if (result.isSuccess()) {
-                        ItemStack filledItem = result.getResult();
-                        if (!player.capabilities.isCreativeMode) {
-                            InventoryHelpers.tryReAddToStack(player, itemStack, filledItem);
+                        if (!player.isSneaking()
+                                && FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                            // Move fluid from the item into the tank if not sneaking
+                            ItemStack drainedItem = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true).getResult();
+                            if (!player.isCreative()) {
+                                InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
+                            }
+                            return true;
+                        } else if (player.isSneaking()
+                                && FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                            // Move fluid from the tank into the item if sneaking
+                            FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
+                            if (result.isSuccess()) {
+                                ItemStack filledItem = result.getResult();
+                                if (!player.isCreative()) {
+                                    InventoryHelpers.tryReAddToStack(player, itemStack, filledItem);
+                                }
+                            }
+                            return true;
                         }
                     }
-                    return true;
-                }
-            }
-        }
-        return false;
+                    return false;
+                })
+                .orElse(false);
+    }
+
+    @Override
+    public boolean hasComparatorInputOverride(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getComparatorInputOverride(BlockState blockState, World worldIn, BlockPos pos) {
+        return TileHelpers.getSafeTile(worldIn, pos, TileFlopper.class)
+                .map(tile -> tile.getTank().getFluidAmount() * 8 / tile.getTank().getCapacity())
+                .orElse(0);
     }
 
     @SubscribeEvent
@@ -286,7 +203,7 @@ public class BlockFlopper extends ConfigurableBlockContainer {
         // Force allow shift-right clicking with a fluid container passing through to this block
         if (!event.getItemStack().isEmpty()
                 && event.getWorld().getBlockState(event.getPos()).getBlock() == this
-                && event.getItemStack().hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null)) {
+                && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
             event.setUseBlock(Event.Result.ALLOW);
         }
     }

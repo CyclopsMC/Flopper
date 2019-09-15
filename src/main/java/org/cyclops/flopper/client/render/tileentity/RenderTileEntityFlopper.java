@@ -3,10 +3,9 @@ package org.cyclops.flopper.client.render.tileentity;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fluids.Fluid;
+import net.minecraft.util.Direction;
 import net.minecraftforge.fluids.FluidStack;
 import org.cyclops.cyclopscore.helper.RenderHelpers;
 import org.cyclops.flopper.tileentity.TileFlopper;
@@ -18,12 +17,12 @@ import org.lwjgl.opengl.GL11;
  * @author rubensworks
  *
  */
-public class RenderTileEntityFlopper extends TileEntitySpecialRenderer<TileFlopper> implements RenderHelpers.IFluidContextRender {
+public class RenderTileEntityFlopper extends TileEntityRenderer<TileFlopper> implements RenderHelpers.IFluidContextRender {
 
     private TileFlopper lastTile;
 
 	@Override
-	public void render(TileFlopper tile, double x, double y, double z, float partialTickTime, int partialDamage, float alpha) {
+	public void render(TileFlopper tile, double x, double y, double z, float partialTickTime, int partialDamage) {
         if(tile != null) {
             lastTile = tile;
             RenderHelpers.renderTileFluidContext(tile.getTank().getFluid(), x, y, z, tile, this);
@@ -32,12 +31,12 @@ public class RenderTileEntityFlopper extends TileEntitySpecialRenderer<TileFlopp
 
     @Override
     public void renderFluid(FluidStack fluid) {
-        double height = (fluid.amount * 0.3125F) / lastTile.getTank().getCapacity() + 0.6875F;
-        int brightness = lastTile.getWorld().getCombinedLight(lastTile.getPos(), fluid.getFluid().getLuminosity(fluid));
+        double height = (fluid.getAmount() * 0.3125F) / lastTile.getTank().getCapacity() + 0.6875F;
+        int brightness = lastTile.getWorld().getCombinedLight(lastTile.getPos(), fluid.getFluid().getAttributes().getLuminosity(fluid));
         int l2 = brightness >> 0x10 & 0xFFFF;
         int i3 = brightness & 0xFFFF;
 
-        TextureAtlasSprite icon = RenderHelpers.getFluidIcon(lastTile.getTank().getFluid(), EnumFacing.UP);
+        TextureAtlasSprite icon = RenderHelpers.getFluidIcon(lastTile.getTank().getFluid(), Direction.UP);
 
         Tessellator t = Tessellator.getInstance();
         BufferBuilder worldRenderer = t.getBuffer();
