@@ -45,7 +45,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     public TileFlopper() {
         super(RegistryEntries.TILE_ENTITY_FLOPPER);
         tank = new SingleUseTank(BlockFlopperConfig.capacityMb);
-        addCapabilityInternal(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, tank);
+        addCapabilityInternal(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, LazyOptional.of(this::getTank));
     }
 
     public Tank getTank() {

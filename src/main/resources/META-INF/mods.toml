@@ -14,13 +14,13 @@ Discover, share and conquer abilities that stick.
 [[dependencies.flopper]]
     modId="cyclopscore"
     mandatory=true
-    versionRange="[1.5.0,)"
+    versionRange="[1.5.4,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.flopper]]
     modId="forge"
     mandatory=true
-    versionRange="[28,)"
+    versionRange="[28.1,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.flopper]]
