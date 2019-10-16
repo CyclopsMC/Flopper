@@ -12,6 +12,7 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -234,6 +235,19 @@ public class BlockFlopper extends BlockTile {
                 && event.getWorld().getBlockState(event.getPos()).getBlock() == this
                 && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
             event.setUseBlock(Event.Result.ALLOW);
+        }
+
+        // The above is broken in Forge at the moment, see https://github.com/MinecraftForge/MinecraftForge/issues/6244
+        // TODO: remove the code below once that has been fixed.
+        if (!event.getItemStack().isEmpty()
+                && event.getWorld().getBlockState(event.getPos()).getBlock() == this
+                && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()
+                && event.getPlayer().isSneaking()) {
+            boolean cancel = this.onBlockActivated(event.getWorld().getBlockState(event.getPos()), event.getWorld(), event.getPos(), event.getPlayer(), event.getHand(), null);
+            if (cancel) {
+                event.setCanceled(true);
+                event.setCancellationResult(ActionResultType.SUCCESS);
+            }
         }
     }
 
