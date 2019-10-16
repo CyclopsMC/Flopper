@@ -1,9 +1,9 @@
 package org.cyclops.flopper.tileentity;
 
 import lombok.experimental.Delegate;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.CompoundNBT;
@@ -15,7 +15,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
@@ -44,7 +43,13 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
 
     public TileFlopper() {
         super(RegistryEntries.TILE_ENTITY_FLOPPER);
-        tank = new SingleUseTank(BlockFlopperConfig.capacityMb);
+        tank = new SingleUseTank(BlockFlopperConfig.capacityMb) {
+            @Override
+            protected void sendUpdate() {
+                super.sendUpdate();
+                TileFlopper.this.sendUpdate();
+            }
+        };
         addCapabilityInternal(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, LazyOptional.of(this::getTank));
     }
 
@@ -179,8 +184,8 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     private IFluidHandler getFluidBlockHandler(Fluid fluid, World world, BlockPos targetPos) {
-        BlockState state = fluid.getAttributes().getBlock(world, pos, fluid.getDefaultState());
-        return new BlockWrapper(state, world, pos);
+        BlockState state = fluid.getAttributes().getBlock(world, targetPos, fluid.getDefaultState());
+        return new BlockWrapper(state, world, targetPos);
     }
 
     /**
@@ -190,7 +195,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     protected boolean pullFluidsFromWorld() {
         BlockPos targetPos = getPos().offset(Direction.UP);
         BlockState destBlockState = world.getBlockState(targetPos);
-        return wrapFluidBlock(destBlockState.getBlock(), world, targetPos)
+        return wrapFluidBlock(destBlockState, world, targetPos)
                 .map(fluidHandler -> {
                     FluidStack moved = FluidUtil.tryFluidTransfer(tank, fluidHandler, Integer.MAX_VALUE, true);
                     if (!moved.isEmpty()) {
@@ -208,9 +213,9 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
                 .orElse(false);
     }
 
-    private LazyOptional<IFluidHandler> wrapFluidBlock(Block block, World world, BlockPos targetPos) {
-        if (block instanceof IFluidBlock) {
-            return FluidUtil.getFluidHandler(world, targetPos, Direction.UP);
+    private LazyOptional<IFluidHandler> wrapFluidBlock(BlockState blockState, World world, BlockPos targetPos) {
+        if (blockState.getBlock() instanceof FlowingFluidBlock) {
+            return LazyOptional.of(() -> new FluidHandlerBlock(blockState, world, targetPos));
         }
         return LazyOptional.empty();
     }
