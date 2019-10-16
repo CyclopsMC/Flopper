@@ -14,7 +14,7 @@ Discover, share and conquer abilities that stick.
 [[dependencies.flopper]]
     modId="cyclopscore"
     mandatory=true
-    versionRange="[1.5.4,)"
+    versionRange="[1.5.5,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.flopper]]
