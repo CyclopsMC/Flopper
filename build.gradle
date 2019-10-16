@@ -203,7 +203,7 @@ curseforge {
     }
 
     project {
-        id = "248353" // my project url is http://minecraft.curseforge.com/mc-mods/248353/
+        id = "290404" // my project url is http://minecraft.curseforge.com/mc-mods/290404/
         releaseType = project.config.release_type
         mainArtifact(jar) {
             relations {
