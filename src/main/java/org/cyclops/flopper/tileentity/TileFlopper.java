@@ -60,12 +60,14 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     @Override
     public void read(CompoundNBT tag) {
         super.read(tag);
-        tank.readFromNBT(tag);
+        tank.readFromNBT(tag.getCompound("tank"));
     }
 
     @Override
     public CompoundNBT write(CompoundNBT tag) {
-        tank.writeToNBT(tag);
+        CompoundNBT tagTank = new CompoundNBT();
+        tank.writeToNBT(tagTank);
+        tag.put("tank", tagTank);
         return super.write(tag);
     }
 
