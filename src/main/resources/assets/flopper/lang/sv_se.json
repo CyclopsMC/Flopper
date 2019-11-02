@@ -1,0 +1,9 @@
+{
+  "_comment": "General",
+  "itemGroup.flopper": "Vätsketratt",
+  "general.flopper.description": "En tratt för att överföra vätskor",
+
+  "_comment": "Blocks",
+  "block.flopper.flopper": "Vätsketratt",
+  "block.flopper.flopper.info": "En tratt för att överföra vätskor"
+}
