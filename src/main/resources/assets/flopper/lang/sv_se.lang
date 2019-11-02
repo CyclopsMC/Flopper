@@ -1,0 +1,7 @@
+# General
+itemGroup.flopper=Vätsketratt
+general.flopper.description=En tratt för att överföra vätskor
+
+# Blocks
+tile.blocks.flopper.flopper.name=Vätsketratt
+tile.blocks.flopper.flopper.info=En tratt för att överföra vätskor
