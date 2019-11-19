@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IEnviromentBlockReader;
 import net.minecraft.world.World;
@@ -159,9 +160,10 @@ public class BlockFlopper extends BlockTile {
                                 player.sendStatusMessage(new StringTextComponent("0 / "
                                         + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
                             } else {
-                                player.sendStatusMessage(new StringTextComponent(L10NHelpers.localize(fluidStack.getTranslationKey()) + ": "
-                                        + String.format("%,d", fluidStack.getAmount()) + " / "
-                                        + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
+                                player.sendStatusMessage(new TranslationTextComponent(fluidStack.getTranslationKey())
+                                        .appendSibling(new StringTextComponent(": "
+                                                + String.format("%,d", fluidStack.getAmount()) + " / "
+                                                + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
                             }
                             return true;
                         }
