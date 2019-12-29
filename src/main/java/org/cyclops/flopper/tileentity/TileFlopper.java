@@ -28,6 +28,8 @@ import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.block.BlockFlopper;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 
+import java.util.Optional;
+
 /**
  * Fluid hopper tile.
  * @author rubensworks
@@ -168,26 +170,34 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
             FluidStack fluidStack = tank.getFluid();
 
             if (!world.dimension.doesWaterVaporize() || !fluidStack.getFluid().getAttributes().doesVaporize(world, pos, fluidStack)) {
-                IFluidHandler fluidHandler = getFluidBlockHandler(fluidStack.getFluid(), world, targetPos);
-                FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
-                if (!moved.isEmpty()) {
-                    if (BlockFlopperConfig.worldPullPushSounds) {
-                        SoundEvent soundevent = moved.getFluid().getAttributes().getFillSound(moved);
-                        world.playSound(null, pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    }
-                    if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
-                        world.neighborChanged(pos, Blocks.AIR, pos);
-                    }
-                    return true;
-                }
+                return getFluidBlockHandler(fluidStack.getFluid(), world, targetPos)
+                        .map(fluidHandler -> {
+                            FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
+                            if (!moved.isEmpty()) {
+                                if (BlockFlopperConfig.worldPullPushSounds) {
+                                    SoundEvent soundevent = moved.getFluid().getAttributes().getFillSound(moved);
+                                    world.playSound(null, pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                                }
+                                if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
+                                    world.neighborChanged(pos, Blocks.AIR, pos);
+                                }
+                                return true;
+                            }
+                            return false;
+                        })
+                        .orElse(false);
+
             }
         }
         return false;
     }
 
-    private IFluidHandler getFluidBlockHandler(Fluid fluid, World world, BlockPos targetPos) {
+    private Optional<IFluidHandler> getFluidBlockHandler(Fluid fluid, World world, BlockPos targetPos) {
+        if (!fluid.getAttributes().canBePlacedInWorld(world, targetPos, fluid.getDefaultState())) {
+            return Optional.empty();
+        }
         BlockState state = fluid.getAttributes().getBlock(world, targetPos, fluid.getDefaultState());
-        return new BlockWrapper(state, world, targetPos);
+        return Optional.of(new BlockWrapper(state, world, targetPos));
     }
 
     /**
