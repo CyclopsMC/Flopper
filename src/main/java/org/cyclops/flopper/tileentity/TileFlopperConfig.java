@@ -31,7 +31,7 @@ public class TileFlopperConfig extends TileEntityConfig<TileFlopper> {
     public void onRegistered() {
         super.onRegistered();
         if (BlockFlopperConfig.renderFluid) {
-            getMod().getProxy().registerRenderer(TileFlopper.class, new RenderTileEntityFlopper());
+            getMod().getProxy().registerRenderer(getInstance(), RenderTileEntityFlopper::new);
         }
     }
 }

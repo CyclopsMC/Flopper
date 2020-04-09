@@ -13,13 +13,10 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -27,7 +24,6 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IEnviromentBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -38,17 +34,13 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.cyclops.cyclopscore.block.BlockTile;
 import org.cyclops.cyclopscore.helper.FluidHelpers;
 import org.cyclops.cyclopscore.helper.InventoryHelpers;
-import org.cyclops.cyclopscore.helper.L10NHelpers;
 import org.cyclops.cyclopscore.helper.TileHelpers;
 import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity;
 import org.cyclops.flopper.tileentity.TileFlopper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 /**
@@ -121,16 +113,6 @@ public class BlockFlopper extends BlockTile {
     }
 
     @Override
-    public boolean doesSideBlockRendering(BlockState state, IEnviromentBlockReader world, BlockPos pos, Direction face) {
-        return true;
-    }
-
-    @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT_MIPPED;
-    }
-
-    @Override
     public BlockState rotate(BlockState state, Rotation rot) {
         return state.with(FACING, rot.rotate(state.get(FACING)));
     }
@@ -145,9 +127,10 @@ public class BlockFlopper extends BlockTile {
     }
 
     @Override
-    public boolean onBlockActivated(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
-        if (super.onBlockActivated(blockState, world, blockPos, player, hand, rayTraceResult)) {
-            return true;
+    public ActionResultType onBlockActivated(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
+        ActionResultType activatedSuper = super.onBlockActivated(blockState, world, blockPos, player, hand, rayTraceResult);
+        if (activatedSuper.isSuccessOrConsume()) {
+            return activatedSuper;
         }
         return TileHelpers.getCapability(world, blockPos, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .map(fluidHandler -> {
@@ -165,18 +148,18 @@ public class BlockFlopper extends BlockTile {
                                                 + String.format("%,d", fluidStack.getAmount()) + " / "
                                                 + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
                             }
-                            return true;
+                            return ActionResultType.SUCCESS;
                         }
                     } else {
-                        if (!player.isSneaking()
-                                && tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                        if (!player.isCrouching()
+                                && FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
                             // Move fluid from the item into the tank if not sneaking
                             ItemStack drainedItem = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true).getResult();
                             if (!player.isCreative()) {
                                 InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
                             }
-                            return true;
-                        } else if (player.isSneaking()
+                            return ActionResultType.SUCCESS;
+                        } else if (player.isCrouching()
                                 && FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
                             // Move fluid from the tank into the item if sneaking
                             FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
@@ -186,36 +169,12 @@ public class BlockFlopper extends BlockTile {
                                     InventoryHelpers.tryReAddToStack(player, itemStack, filledItem);
                                 }
                             }
-                            return true;
+                            return ActionResultType.SUCCESS;
                         }
                     }
-                    return false;
+                    return ActionResultType.PASS;
                 })
-                .orElse(false);
-    }
-
-    // A modified/fixed version of FluidUtil#tryEmptyContainer
-    // TODO: Remove this once Forge fixes it.
-    @Nonnull
-    public static FluidActionResult tryEmptyContainer(@Nonnull ItemStack container, IFluidHandler fluidDestination, int maxAmount, @Nullable PlayerEntity player, boolean doDrain)
-    {
-        ItemStack containerCopy = ItemHandlerHelper.copyStackWithSize(container, 1); // do not modify the input
-        return FluidUtil.getFluidHandler(containerCopy)
-                .map(containerFluidHandler -> {
-                    FluidStack transfer = FluidUtil.tryFluidTransfer(fluidDestination, containerFluidHandler, maxAmount, doDrain);
-                    if (transfer.isEmpty())
-                        return FluidActionResult.FAILURE;
-
-                    if (doDrain && player != null)
-                    {
-                        SoundEvent soundevent = transfer.getFluid().getAttributes().getEmptySound(transfer);
-                        player.world.playSound(null, player.posX, player.posY + 0.5, player.posZ, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                    }
-
-                    ItemStack resultContainer = containerFluidHandler.getContainer();
-                    return new FluidActionResult(resultContainer);
-                })
-                .orElse(FluidActionResult.FAILURE);
+                .orElse(ActionResultType.PASS);
     }
 
     @Override
@@ -237,19 +196,6 @@ public class BlockFlopper extends BlockTile {
                 && event.getWorld().getBlockState(event.getPos()).getBlock() == this
                 && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
             event.setUseBlock(Event.Result.ALLOW);
-        }
-
-        // The above is broken in Forge at the moment, see https://github.com/MinecraftForge/MinecraftForge/issues/6244
-        // TODO: remove the code below once that has been fixed.
-        if (!event.getItemStack().isEmpty()
-                && event.getWorld().getBlockState(event.getPos()).getBlock() == this
-                && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()
-                && event.getPlayer().isSneaking()) {
-            boolean cancel = this.onBlockActivated(event.getWorld().getBlockState(event.getPos()), event.getWorld(), event.getPos(), event.getPlayer(), event.getHand(), null);
-            if (cancel) {
-                event.setCanceled(true);
-                event.setCancellationResult(ActionResultType.SUCCESS);
-            }
         }
     }
 
