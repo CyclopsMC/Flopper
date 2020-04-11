@@ -38,7 +38,7 @@ public class RenderTileEntityFlopper extends TileEntityRenderer<TileFlopper> {
                 int i3 = brightness & 0xFFFF;
 
                 TextureAtlasSprite icon = RenderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
-                Triple<Float, Float, Float> color = Helpers.intToRGB(fluid.getFluid().getAttributes().getColor());
+                Triple<Float, Float, Float> color = Helpers.intToRGB(fluid.getFluid().getAttributes().getColor(tile.getWorld(), tile.getPos()));
 
                 IVertexBuilder vb = buffer.getBuffer(RenderType.getText(icon.getAtlasTexture().getTextureLocation()));
                 Matrix4f matrix = matrixStack.getLast().getMatrix();
