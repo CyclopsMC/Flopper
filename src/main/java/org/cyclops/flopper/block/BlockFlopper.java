@@ -17,6 +17,8 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -34,6 +36,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import org.cyclops.cyclopscore.block.BlockTile;
 import org.cyclops.cyclopscore.helper.FluidHelpers;
 import org.cyclops.cyclopscore.helper.InventoryHelpers;
@@ -41,6 +44,8 @@ import org.cyclops.cyclopscore.helper.TileHelpers;
 import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity;
 import org.cyclops.flopper.tileentity.TileFlopper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 /**
@@ -152,7 +157,7 @@ public class BlockFlopper extends BlockTile {
                         }
                     } else {
                         if (!player.isCrouching()
-                                && FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                                && tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
                             // Move fluid from the item into the tank if not sneaking
                             ItemStack drainedItem = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true).getResult();
                             if (!player.isCreative()) {
@@ -175,6 +180,30 @@ public class BlockFlopper extends BlockTile {
                     return ActionResultType.PASS;
                 })
                 .orElse(ActionResultType.PASS);
+    }
+
+    // A modified/fixed version of FluidUtil#tryEmptyContainer
+    // TODO: Remove this once Forge fixes it.
+    @Nonnull
+    public static FluidActionResult tryEmptyContainer(@Nonnull ItemStack container, IFluidHandler fluidDestination, int maxAmount, @Nullable PlayerEntity player, boolean doDrain)
+    {
+        ItemStack containerCopy = ItemHandlerHelper.copyStackWithSize(container, 1); // do not modify the input
+        return FluidUtil.getFluidHandler(containerCopy)
+                .map(containerFluidHandler -> {
+                    FluidStack transfer = FluidUtil.tryFluidTransfer(fluidDestination, containerFluidHandler, maxAmount, doDrain);
+                    if (transfer.isEmpty())
+                        return FluidActionResult.FAILURE;
+
+                    if (doDrain && player != null)
+                    {
+                        SoundEvent soundevent = transfer.getFluid().getAttributes().getEmptySound(transfer);
+                        player.world.playSound(null, player.getPosX(), player.getPosY() + 0.5, player.getPosZ(), soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    }
+
+                    ItemStack resultContainer = containerFluidHandler.getContainer();
+                    return new FluidActionResult(resultContainer);
+                })
+                .orElse(FluidActionResult.FAILURE);
     }
 
     @Override
