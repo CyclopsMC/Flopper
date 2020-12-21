@@ -1,31 +1,32 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[34,)"
 issueTrackerURL="https://github.com/CyclopsMC/Flopper/issues"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/flopper"
+license="MIT"
+logoFile="logo.png"
+authors="rubensworks (aka kroeser)"
 [[mods]]
 modId="flopper"
 version="${file.jarVersion}"
 displayName="Flopper"
-displayURL="https://www.curseforge.com/minecraft/mc-mods/flopper"
-logoFile="logo.png"
-authors="rubensworks (aka kroeser)"
 description='''
 Discover, share and conquer abilities that stick.
 '''
 [[dependencies.flopper]]
     modId="cyclopscore"
     mandatory=true
-    versionRange="[1.6.1,)"
+    versionRange="[1.9.0,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.flopper]]
     modId="forge"
     mandatory=true
-    versionRange="[31.1,)"
+    versionRange="[34,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.flopper]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.2,]"
     ordering="NONE"
     side="BOTH"

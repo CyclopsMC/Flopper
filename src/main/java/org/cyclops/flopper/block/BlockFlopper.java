@@ -149,7 +149,7 @@ public class BlockFlopper extends BlockTile {
                                         + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
                             } else {
                                 player.sendStatusMessage(new TranslationTextComponent(fluidStack.getTranslationKey())
-                                        .appendSibling(new StringTextComponent(": "
+                                        .append(new StringTextComponent(": "
                                                 + String.format("%,d", fluidStack.getAmount()) + " / "
                                                 + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
                             }

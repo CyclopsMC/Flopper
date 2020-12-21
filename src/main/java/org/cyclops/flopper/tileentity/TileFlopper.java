@@ -169,7 +169,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
                 || (isDestNonSolid && isDestReplaceable && !destMaterial.isLiquid())) {
             FluidStack fluidStack = tank.getFluid();
 
-            if (!world.dimension.doesWaterVaporize() || !fluidStack.getFluid().getAttributes().doesVaporize(world, pos, fluidStack)) {
+            if (!world.getDimensionType().isUltrawarm() || !fluidStack.getFluid().getAttributes().doesVaporize(world, pos, fluidStack)) {
                 return getFluidBlockHandler(fluidStack.getFluid(), world, targetPos)
                         .map(fluidHandler -> {
                             FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
