@@ -4,6 +4,7 @@ import lombok.experimental.Delegate;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.CompoundNBT;
@@ -226,7 +227,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     private LazyOptional<IFluidHandler> wrapFluidBlock(BlockState blockState, World world, BlockPos targetPos) {
-        if (blockState.getBlock() instanceof FlowingFluidBlock) {
+        if (blockState.getBlock() instanceof FlowingFluidBlock || blockState.getBlock() instanceof IWaterLoggable) {
             return LazyOptional.of(() -> new FluidHandlerBlock(blockState, world, targetPos));
         }
         return LazyOptional.empty();
