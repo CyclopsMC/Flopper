@@ -206,9 +206,12 @@ public class BlockFlopper extends BlockTile {
                         if (!player.isCrouching()
                                 && tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
                             // Move fluid from the item into the tank if not sneaking
-                            ItemStack drainedItem = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true).getResult();
-                            if (!player.isCreative()) {
-                                InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
+                            FluidActionResult result = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
+                            if (result.isSuccess()) {
+                                ItemStack drainedItem = result.getResult();
+                                if (!player.isCreative()) {
+                                    InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
+                                }
                             }
                             return ActionResultType.SUCCESS;
                         } else if (player.isCrouching()
