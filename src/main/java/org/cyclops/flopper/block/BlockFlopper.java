@@ -51,48 +51,50 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 /**
  * Fluid hopper block.
  * @author rubensworks
  */
 public class BlockFlopper extends BlockTile {
 
-    public static final DirectionProperty FACING = BlockStateProperties.FACING_EXCEPT_UP;
+    public static final DirectionProperty FACING = BlockStateProperties.FACING_HOPPER;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
     // Copied from HopperBlock, to avoid conflicts with other mods messing with the hopper
-    private static final VoxelShape INPUT_SHAPE = Block.makeCuboidShape(0.0D, 10.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-    private static final VoxelShape MIDDLE_SHAPE = Block.makeCuboidShape(4.0D, 4.0D, 4.0D, 12.0D, 10.0D, 12.0D);
+    private static final VoxelShape INPUT_SHAPE = Block.box(0.0D, 10.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+    private static final VoxelShape MIDDLE_SHAPE = Block.box(4.0D, 4.0D, 4.0D, 12.0D, 10.0D, 12.0D);
     private static final VoxelShape INPUT_MIDDLE_SHAPE = VoxelShapes.or(MIDDLE_SHAPE, INPUT_SHAPE);
-    private static final VoxelShape BASE_SHAPE = VoxelShapes.combineAndSimplify(INPUT_MIDDLE_SHAPE, IHopper.INSIDE_BOWL_SHAPE, IBooleanFunction.ONLY_FIRST);
-    private static final VoxelShape DOWN_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.makeCuboidShape(6.0D, 0.0D, 6.0D, 10.0D, 4.0D, 10.0D));
-    private static final VoxelShape EAST_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.makeCuboidShape(12.0D, 4.0D, 6.0D, 16.0D, 8.0D, 10.0D));
-    private static final VoxelShape NORTH_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.makeCuboidShape(6.0D, 4.0D, 0.0D, 10.0D, 8.0D, 4.0D));
-    private static final VoxelShape SOUTH_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.makeCuboidShape(6.0D, 4.0D, 12.0D, 10.0D, 8.0D, 16.0D));
-    private static final VoxelShape WEST_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.makeCuboidShape(0.0D, 4.0D, 6.0D, 4.0D, 8.0D, 10.0D));
-    private static final VoxelShape DOWN_RAYTRACE_SHAPE = IHopper.INSIDE_BOWL_SHAPE;
-    private static final VoxelShape EAST_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE_BOWL_SHAPE, Block.makeCuboidShape(12.0D, 8.0D, 6.0D, 16.0D, 10.0D, 10.0D));
-    private static final VoxelShape NORTH_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE_BOWL_SHAPE, Block.makeCuboidShape(6.0D, 8.0D, 0.0D, 10.0D, 10.0D, 4.0D));
-    private static final VoxelShape SOUTH_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE_BOWL_SHAPE, Block.makeCuboidShape(6.0D, 8.0D, 12.0D, 10.0D, 10.0D, 16.0D));
-    private static final VoxelShape WEST_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE_BOWL_SHAPE, Block.makeCuboidShape(0.0D, 8.0D, 6.0D, 4.0D, 10.0D, 10.0D));
+    private static final VoxelShape BASE_SHAPE = VoxelShapes.join(INPUT_MIDDLE_SHAPE, IHopper.INSIDE, IBooleanFunction.ONLY_FIRST);
+    private static final VoxelShape DOWN_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.box(6.0D, 0.0D, 6.0D, 10.0D, 4.0D, 10.0D));
+    private static final VoxelShape EAST_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.box(12.0D, 4.0D, 6.0D, 16.0D, 8.0D, 10.0D));
+    private static final VoxelShape NORTH_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.box(6.0D, 4.0D, 0.0D, 10.0D, 8.0D, 4.0D));
+    private static final VoxelShape SOUTH_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.box(6.0D, 4.0D, 12.0D, 10.0D, 8.0D, 16.0D));
+    private static final VoxelShape WEST_SHAPE = VoxelShapes.or(BASE_SHAPE, Block.box(0.0D, 4.0D, 6.0D, 4.0D, 8.0D, 10.0D));
+    private static final VoxelShape DOWN_RAYTRACE_SHAPE = IHopper.INSIDE;
+    private static final VoxelShape EAST_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE, Block.box(12.0D, 8.0D, 6.0D, 16.0D, 10.0D, 10.0D));
+    private static final VoxelShape NORTH_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE, Block.box(6.0D, 8.0D, 0.0D, 10.0D, 10.0D, 4.0D));
+    private static final VoxelShape SOUTH_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE, Block.box(6.0D, 8.0D, 12.0D, 10.0D, 10.0D, 16.0D));
+    private static final VoxelShape WEST_RAYTRACE_SHAPE = VoxelShapes.or(IHopper.INSIDE, Block.box(0.0D, 8.0D, 6.0D, 4.0D, 10.0D, 10.0D));
 
     public BlockFlopper(Properties properties, Supplier<CyclopsTileEntity> tileEntitySupplier) {
         super(properties, tileEntitySupplier);
         MinecraftForge.EVENT_BUS.register(this);
-        this.setDefaultState(this.stateContainer.getBaseState()
-                .with(FACING, Direction.DOWN)
-                .with(ENABLED, true));
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.DOWN)
+                .setValue(ENABLED, true));
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(FACING, ENABLED);
     }
 
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
         // Copied from HopperBlock, to avoid conflicts with other mods messing with the hopper
-        switch((Direction)state.get(FACING)) {
+        switch((Direction)state.getValue(FACING)) {
             case DOWN:
                 return DOWN_SHAPE;
             case NORTH:
@@ -109,9 +111,9 @@ public class BlockFlopper extends BlockTile {
     }
 
     @Override
-    public VoxelShape getRaytraceShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
+    public VoxelShape getInteractionShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
         // Copied from HopperBlock, to avoid conflicts with other mods messing with the hopper
-        switch((Direction)state.get(FACING)) {
+        switch((Direction)state.getValue(FACING)) {
             case DOWN:
                 return DOWN_RAYTRACE_SHAPE;
             case NORTH:
@@ -123,24 +125,24 @@ public class BlockFlopper extends BlockTile {
             case EAST:
                 return EAST_RAYTRACE_SHAPE;
             default:
-                return IHopper.INSIDE_BOWL_SHAPE;
+                return IHopper.INSIDE;
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        Direction direction = context.getFace().getOpposite();
+        Direction direction = context.getClickedFace().getOpposite();
         if (direction == Direction.UP) {
             direction = Direction.DOWN;
         }
-        return this.getDefaultState()
-                .with(FACING, direction)
-                .with(ENABLED, true);
+        return this.defaultBlockState()
+                .setValue(FACING, direction)
+                .setValue(ENABLED, true);
     }
 
     @Override
-    public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (oldState.getBlock() != state.getBlock()) {
             this.updateState(worldIn, pos, state);
         }
@@ -153,49 +155,49 @@ public class BlockFlopper extends BlockTile {
     }
 
     private void updateState(World worldIn, BlockPos pos, BlockState state) {
-        boolean notPowered = !worldIn.isBlockPowered(pos);
-        if (notPowered != state.get(ENABLED)) {
-            worldIn.setBlockState(pos, state.with(ENABLED, notPowered), 4);
+        boolean notPowered = !worldIn.hasNeighborSignal(pos);
+        if (notPowered != state.getValue(ENABLED)) {
+            worldIn.setBlock(pos, state.setValue(ENABLED, notPowered), 4);
         }
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public BlockRenderType getRenderShape(BlockState state) {
         return BlockRenderType.MODEL;
     }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rot) {
-        return state.with(FACING, rot.rotate(state.get(FACING)));
+        return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
 
     public BlockState mirror(BlockState state, Mirror mirrorIn) {
-        return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+        return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean isPathfindable(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
         return false;
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
-        ActionResultType activatedSuper = super.onBlockActivated(blockState, world, blockPos, player, hand, rayTraceResult);
-        if (activatedSuper.isSuccessOrConsume()) {
+    public ActionResultType use(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
+        ActionResultType activatedSuper = super.use(blockState, world, blockPos, player, hand, rayTraceResult);
+        if (activatedSuper.consumesAction()) {
             return activatedSuper;
         }
         return TileHelpers.getCapability(world, blockPos, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .map(fluidHandler -> {
-                    ItemStack itemStack = player.getHeldItem(hand);
+                    ItemStack itemStack = player.getItemInHand(hand);
                     if (itemStack.isEmpty()) {
                         if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
                             // If the hand is empty, show the tank contents
                             FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
                             if (fluidStack.isEmpty()) {
-                                player.sendStatusMessage(new StringTextComponent("0 / "
+                                player.displayClientMessage(new StringTextComponent("0 / "
                                         + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
                             } else {
-                                player.sendStatusMessage(new TranslationTextComponent(fluidStack.getTranslationKey())
+                                player.displayClientMessage(new TranslationTextComponent(fluidStack.getTranslationKey())
                                         .append(new StringTextComponent(": "
                                                 + String.format("%,d", fluidStack.getAmount()) + " / "
                                                 + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
@@ -247,7 +249,7 @@ public class BlockFlopper extends BlockTile {
                     if (doDrain && player != null)
                     {
                         SoundEvent soundevent = transfer.getFluid().getAttributes().getEmptySound(transfer);
-                        player.world.playSound(null, player.getPosX(), player.getPosY() + 0.5, player.getPosZ(), soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
                     }
 
                     ItemStack resultContainer = containerFluidHandler.getContainer();
@@ -257,12 +259,12 @@ public class BlockFlopper extends BlockTile {
     }
 
     @Override
-    public boolean hasComparatorInputOverride(BlockState state) {
+    public boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState blockState, World worldIn, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState blockState, World worldIn, BlockPos pos) {
         return TileHelpers.getSafeTile(worldIn, pos, TileFlopper.class)
                 .map(tile -> tile.getTank().getFluidAmount() * 8 / tile.getTank().getCapacity())
                 .orElse(0);

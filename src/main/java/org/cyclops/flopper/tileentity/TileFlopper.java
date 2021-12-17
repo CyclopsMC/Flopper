@@ -31,6 +31,9 @@ import org.cyclops.flopper.block.BlockFlopperConfig;
 
 import java.util.Optional;
 
+import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity.ITickingTile;
+import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity.TickingTileComponent;
+
 /**
  * Fluid hopper tile.
  * @author rubensworks
@@ -67,18 +70,18 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT tag) {
+    public CompoundNBT save(CompoundNBT tag) {
         CompoundNBT tagTank = new CompoundNBT();
         tank.writeToNBT(tagTank);
         tag.put("tank", tagTank);
-        return super.write(tag);
+        return super.save(tag);
     }
 
     @Override
     protected void updateTileEntity() {
         super.updateTileEntity();
 
-        if (this.world != null && !this.world.isRemote) {
+        if (this.level != null && !this.level.isClientSide) {
             --this.transferCooldown;
             if (!this.isOnTransferCooldown()) {
                 this.setTransferCooldown(0);
@@ -96,9 +99,9 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     protected boolean updateHopper() {
-        if (this.world != null && !this.world.isRemote) {
+        if (this.level != null && !this.level.isClientSide) {
             if (!this.isOnTransferCooldown() && BlockHelpers.getSafeBlockStateProperty(
-                    getWorld().getBlockState(getPos()), BlockFlopper.ENABLED, false)) {
+                    getLevel().getBlockState(getBlockPos()), BlockFlopper.ENABLED, false)) {
                 boolean worked = false;
                 boolean workedWorld = false;
 
@@ -118,7 +121,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
                 if (worked) {
                     this.setTransferCooldown(workedWorld
                             ? BlockFlopperConfig.workWorldCooldown : BlockFlopperConfig.workCooldown);
-                    this.markDirty();
+                    this.setChanged();
                     return true;
                 }
             }
@@ -130,7 +133,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     protected Direction getFacing() {
-        return getWorld().getBlockState(getPos()).get(BlockFlopper.FACING);
+        return getLevel().getBlockState(getBlockPos()).getValue(BlockFlopper.FACING);
     }
 
     /**
@@ -139,8 +142,8 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
      */
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
-        BlockPos targetPos = getPos().offset(getFacing());
-        return TileHelpers.getCapability(world, targetPos, targetSide, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        BlockPos targetPos = getBlockPos().relative(getFacing());
+        return TileHelpers.getCapability(level, targetPos, targetSide, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(fluidHandler, tank, BlockFlopperConfig.pushFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -150,8 +153,8 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
      * @return If some fluid was moved.
      */
     protected boolean pullFluidsFromTank() {
-        BlockPos targetPos = getPos().offset(Direction.UP);
-        return TileHelpers.getCapability(world, targetPos, Direction.DOWN, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        BlockPos targetPos = getBlockPos().relative(Direction.UP);
+        return TileHelpers.getCapability(level, targetPos, Direction.DOWN, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -161,26 +164,26 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
      * @return If some fluid was moved.
      */
     protected boolean pushFluidsToWorld() {
-        BlockPos targetPos = getPos().offset(getFacing());
-        BlockState destBlockState = world.getBlockState(targetPos);
+        BlockPos targetPos = getBlockPos().relative(getFacing());
+        BlockState destBlockState = level.getBlockState(targetPos);
         final Material destMaterial = destBlockState.getMaterial();
         final boolean isDestNonSolid = !destMaterial.isSolid();
         final boolean isDestReplaceable = destBlockState.getMaterial().isReplaceable();
-        if (world.isAirBlock(targetPos)
+        if (level.isEmptyBlock(targetPos)
                 || (isDestNonSolid && isDestReplaceable && !destMaterial.isLiquid())) {
             FluidStack fluidStack = tank.getFluid();
 
-            if (!world.getDimensionType().isUltrawarm() || !fluidStack.getFluid().getAttributes().doesVaporize(world, pos, fluidStack)) {
-                return getFluidBlockHandler(fluidStack.getFluid(), world, targetPos)
+            if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getAttributes().doesVaporize(level, worldPosition, fluidStack)) {
+                return getFluidBlockHandler(fluidStack.getFluid(), level, targetPos)
                         .map(fluidHandler -> {
                             FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
                             if (!moved.isEmpty()) {
                                 if (BlockFlopperConfig.worldPullPushSounds) {
                                     SoundEvent soundevent = moved.getFluid().getAttributes().getFillSound(moved);
-                                    world.playSound(null, pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                                    level.playSound(null, worldPosition, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
                                 }
                                 if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
-                                    world.neighborChanged(pos, Blocks.AIR, pos);
+                                    level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
                                 }
                                 return true;
                             }
@@ -194,10 +197,10 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     private Optional<IFluidHandler> getFluidBlockHandler(Fluid fluid, World world, BlockPos targetPos) {
-        if (!fluid.getAttributes().canBePlacedInWorld(world, targetPos, fluid.getDefaultState())) {
+        if (!fluid.getAttributes().canBePlacedInWorld(world, targetPos, fluid.defaultFluidState())) {
             return Optional.empty();
         }
-        BlockState state = fluid.getAttributes().getBlock(world, targetPos, fluid.getDefaultState());
+        BlockState state = fluid.getAttributes().getBlock(world, targetPos, fluid.defaultFluidState());
         return Optional.of(new BlockWrapper(state, world, targetPos));
     }
 
@@ -206,18 +209,18 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
      * @return If some fluid was moved.
      */
     protected boolean pullFluidsFromWorld() {
-        BlockPos targetPos = getPos().offset(Direction.UP);
-        BlockState destBlockState = world.getBlockState(targetPos);
-        return wrapFluidBlock(destBlockState, world, targetPos)
+        BlockPos targetPos = getBlockPos().relative(Direction.UP);
+        BlockState destBlockState = level.getBlockState(targetPos);
+        return wrapFluidBlock(destBlockState, level, targetPos)
                 .map(fluidHandler -> {
                     FluidStack moved = FluidUtil.tryFluidTransfer(tank, fluidHandler, Integer.MAX_VALUE, true);
                     if (!moved.isEmpty()) {
                         if (BlockFlopperConfig.worldPullPushSounds) {
                             SoundEvent soundevent = moved.getFluid().getAttributes().getEmptySound(moved);
-                            world.playSound(null, pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                            level.playSound(null, worldPosition, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
                         }
                         if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
-                            world.neighborChanged(pos, Blocks.AIR, pos);
+                            level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
                         }
                         return true;
                     }

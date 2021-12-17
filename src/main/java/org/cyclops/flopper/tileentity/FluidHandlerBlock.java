@@ -15,6 +15,8 @@ import org.cyclops.cyclopscore.helper.FluidHelpers;
 
 import javax.annotation.Nonnull;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 /**
  * A fluid handler that wraps around a fluid block for draining it,
  * it can not be filled.
@@ -41,9 +43,9 @@ public class FluidHandlerBlock implements IFluidHandler {
     @Override
     public FluidStack getFluidInTank(int tank) {
         Block block = this.state.getBlock();
-        if (block instanceof FlowingFluidBlock && this.state.get(FlowingFluidBlock.LEVEL) == 0) {
+        if (block instanceof FlowingFluidBlock && this.state.getValue(FlowingFluidBlock.LEVEL) == 0) {
             return new FluidStack(((FlowingFluidBlock) block).getFluid(), FluidHelpers.BUCKET_VOLUME);
-        } else if (this.state.hasProperty(BlockStateProperties.WATERLOGGED) && this.state.get(BlockStateProperties.WATERLOGGED)) {
+        } else if (this.state.hasProperty(BlockStateProperties.WATERLOGGED) && this.state.getValue(BlockStateProperties.WATERLOGGED)) {
             return new FluidStack(Fluids.WATER, FluidHelpers.BUCKET_VOLUME);
         } else {
             return FluidStack.EMPTY;
@@ -73,7 +75,7 @@ public class FluidHandlerBlock implements IFluidHandler {
                 && ((FlowingFluidBlock) block).getFluid() == resource.getFluid()) {
             return this.drain(resource.getAmount(), action);
         } else if (this.state.hasProperty(BlockStateProperties.WATERLOGGED)
-                && this.state.get(BlockStateProperties.WATERLOGGED)
+                && this.state.getValue(BlockStateProperties.WATERLOGGED)
                 && block instanceof IWaterLoggable) {
             return this.drain(resource.getAmount(), action);
         }
@@ -85,18 +87,18 @@ public class FluidHandlerBlock implements IFluidHandler {
     public FluidStack drain(int maxDrain, FluidAction action) {
         Block block = this.state.getBlock();
         if (block instanceof FlowingFluidBlock
-                && this.state.get(FlowingFluidBlock.LEVEL) == 0
+                && this.state.getValue(FlowingFluidBlock.LEVEL) == 0
                 && maxDrain >= FluidHelpers.BUCKET_VOLUME) {
             if (action.execute()) {
-                this.world.setBlockState(this.blockPos, Blocks.AIR.getDefaultState(), 11);
+                this.world.setBlock(this.blockPos, Blocks.AIR.defaultBlockState(), 11);
             }
             return new FluidStack(((FlowingFluidBlock) block).getFluid(), FluidHelpers.BUCKET_VOLUME);
         } else if (this.state.hasProperty(BlockStateProperties.WATERLOGGED)
-                && this.state.get(BlockStateProperties.WATERLOGGED)
+                && this.state.getValue(BlockStateProperties.WATERLOGGED)
                 && block instanceof IWaterLoggable
                 && maxDrain >= FluidHelpers.BUCKET_VOLUME) {
             if (action.execute()) {
-                ((IWaterLoggable) block).pickupFluid(world, blockPos, state);
+                ((IWaterLoggable) block).takeLiquid(world, blockPos, state);
             }
             return new FluidStack(Fluids.WATER, FluidHelpers.BUCKET_VOLUME);
         }

@@ -38,14 +38,14 @@ public class RenderTileEntityFlopper extends TileEntityRenderer<TileFlopper> {
                 int i3 = brightness & 0xFFFF;
 
                 TextureAtlasSprite icon = RenderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
-                Triple<Float, Float, Float> color = Helpers.intToRGB(fluid.getFluid().getAttributes().getColor(tile.getWorld(), tile.getPos()));
+                Triple<Float, Float, Float> color = Helpers.intToRGB(fluid.getFluid().getAttributes().getColor(tile.getLevel(), tile.getBlockPos()));
 
-                IVertexBuilder vb = buffer.getBuffer(RenderType.getText(icon.getAtlasTexture().getTextureLocation()));
-                Matrix4f matrix = matrixStack.getLast().getMatrix();
-                vb.pos(matrix, 0.125F, height, 0.125F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).tex(icon.getMinU(), icon.getMaxV()).lightmap(l2, i3).endVertex();
-                vb.pos(matrix, 0.125F, height, 0.875F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).tex(icon.getMinU(), icon.getMinV()).lightmap(l2, i3).endVertex();
-                vb.pos(matrix, 0.875F, height, 0.875F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).tex(icon.getMaxU(), icon.getMinV()).lightmap(l2, i3).endVertex();
-                vb.pos(matrix, 0.875F, height, 0.125F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).tex(icon.getMaxU(), icon.getMaxV()).lightmap(l2, i3).endVertex();
+                IVertexBuilder vb = buffer.getBuffer(RenderType.text(icon.atlas().location()));
+                Matrix4f matrix = matrixStack.last().pose();
+                vb.vertex(matrix, 0.125F, height, 0.125F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).uv(icon.getU0(), icon.getV1()).uv2(l2, i3).endVertex();
+                vb.vertex(matrix, 0.125F, height, 0.875F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).uv(icon.getU0(), icon.getV0()).uv2(l2, i3).endVertex();
+                vb.vertex(matrix, 0.875F, height, 0.875F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).uv(icon.getU1(), icon.getV0()).uv2(l2, i3).endVertex();
+                vb.vertex(matrix, 0.875F, height, 0.125F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).uv(icon.getU1(), icon.getV1()).uv2(l2, i3).endVertex();
             });
         }
     }

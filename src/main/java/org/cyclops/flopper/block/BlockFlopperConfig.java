@@ -55,8 +55,8 @@ public class BlockFlopperConfig extends BlockConfig {
                 Flopper._instance,
                 "flopper",
                 eConfig -> new BlockFlopper(Block.Properties
-                        .create(Material.IRON, MaterialColor.STONE)
-                        .hardnessAndResistance(3.0F, 4.8F)
+                        .of(Material.METAL, MaterialColor.STONE)
+                        .strength(3.0F, 4.8F)
                         .sound(SoundType.METAL), TileFlopper::new),
                 getDefaultItemConstructor(Flopper._instance)
         );
