@@ -1,27 +1,27 @@
-package org.cyclops.flopper.tileentity;
+package org.cyclops.flopper.blockentity;
 
 import com.google.common.collect.Sets;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.cyclops.cyclopscore.config.extendedconfig.TileEntityConfig;
+import org.cyclops.cyclopscore.config.extendedconfig.BlockEntityConfig;
 import org.cyclops.flopper.Flopper;
 import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.block.BlockFlopperConfig;
-import org.cyclops.flopper.client.render.tileentity.RenderTileEntityFlopper;
+import org.cyclops.flopper.client.render.blockentity.RenderBlockEntityFlopper;
 
 /**
- * Config for the {@link TileFlopper}.
+ * Config for the {@link BlockEntityFlopper}.
  * @author rubensworks
  *
  */
-public class TileFlopperConfig extends TileEntityConfig<TileFlopper> {
+public class BlockEntityFlopperConfig extends BlockEntityConfig<BlockEntityFlopper> {
 
-    public TileFlopperConfig() {
+    public BlockEntityFlopperConfig() {
         super(
                 Flopper._instance,
                 "flopper",
-                (eConfig) -> new TileEntityType<>(TileFlopper::new,
+                (eConfig) -> new BlockEntityType<>(BlockEntityFlopper::new,
                         Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER), null)
         );
     }
@@ -31,7 +31,7 @@ public class TileFlopperConfig extends TileEntityConfig<TileFlopper> {
     public void onRegistered() {
         super.onRegistered();
         if (BlockFlopperConfig.renderFluid) {
-            getMod().getProxy().registerRenderer(getInstance(), RenderTileEntityFlopper::new);
+            getMod().getProxy().registerRenderer(getInstance(), RenderBlockEntityFlopper::new);
         }
     }
 }

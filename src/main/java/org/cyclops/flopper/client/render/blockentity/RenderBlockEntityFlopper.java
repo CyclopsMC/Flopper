@@ -1,19 +1,19 @@
-package org.cyclops.flopper.client.render.tileentity;
+package org.cyclops.flopper.client.render.blockentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.core.Direction;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cyclops.cyclopscore.helper.Helpers;
 import org.cyclops.cyclopscore.helper.RenderHelpers;
-import org.cyclops.flopper.tileentity.TileFlopper;
+import org.cyclops.flopper.blockentity.BlockEntityFlopper;
 
 /**
  * Renderer for the item inside the {@link org.cyclops.flopper.block.BlockFlopper}.
@@ -21,14 +21,14 @@ import org.cyclops.flopper.tileentity.TileFlopper;
  * @author rubensworks
  *
  */
-public class RenderTileEntityFlopper extends TileEntityRenderer<TileFlopper> {
+public class RenderBlockEntityFlopper implements BlockEntityRenderer<BlockEntityFlopper> {
 
-    public RenderTileEntityFlopper(TileEntityRendererDispatcher rendererDispatcherIn) {
-        super(rendererDispatcherIn);
+    public RenderBlockEntityFlopper(BlockEntityRendererProvider.Context context) {
+
     }
 
     @Override
-    public void render(TileFlopper tile, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+    public void render(BlockEntityFlopper tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         if(tile != null) {
             FluidStack fluid = tile.getTank().getFluid();
             RenderHelpers.renderFluidContext(fluid, matrixStack, () -> {
@@ -40,7 +40,7 @@ public class RenderTileEntityFlopper extends TileEntityRenderer<TileFlopper> {
                 TextureAtlasSprite icon = RenderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
                 Triple<Float, Float, Float> color = Helpers.intToRGB(fluid.getFluid().getAttributes().getColor(tile.getLevel(), tile.getBlockPos()));
 
-                IVertexBuilder vb = buffer.getBuffer(RenderType.text(icon.atlas().location()));
+                VertexConsumer vb = buffer.getBuffer(RenderType.text(icon.atlas().location()));
                 Matrix4f matrix = matrixStack.last().pose();
                 vb.vertex(matrix, 0.125F, height, 0.125F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).uv(icon.getU0(), icon.getV1()).uv2(l2, i3).endVertex();
                 vb.vertex(matrix, 0.125F, height, 0.875F).color(color.getLeft(), color.getMiddle(), color.getRight(), 1).uv(icon.getU0(), icon.getV0()).uv2(l2, i3).endVertex();

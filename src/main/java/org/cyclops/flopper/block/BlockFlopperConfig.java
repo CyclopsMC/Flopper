@@ -1,14 +1,14 @@
 package org.cyclops.flopper.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.fml.config.ModConfig;
 import org.cyclops.cyclopscore.config.ConfigurableProperty;
 import org.cyclops.cyclopscore.config.extendedconfig.BlockConfig;
 import org.cyclops.flopper.Flopper;
-import org.cyclops.flopper.tileentity.TileFlopper;
+import org.cyclops.flopper.blockentity.BlockEntityFlopper;
 
 /**
  * Config for the {@link BlockFlopper}.
@@ -57,7 +57,7 @@ public class BlockFlopperConfig extends BlockConfig {
                 eConfig -> new BlockFlopper(Block.Properties
                         .of(Material.METAL, MaterialColor.STONE)
                         .strength(3.0F, 4.8F)
-                        .sound(SoundType.METAL), TileFlopper::new),
+                        .sound(SoundType.METAL), BlockEntityFlopper::new),
                 getDefaultItemConstructor(Flopper._instance)
         );
     }

@@ -1,6 +1,6 @@
 package org.cyclops.flopper;
 
-import net.minecraft.item.ItemGroup;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
@@ -11,7 +11,7 @@ import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 import org.cyclops.flopper.proxy.ClientProxy;
 import org.cyclops.flopper.proxy.CommonProxy;
-import org.cyclops.flopper.tileentity.TileFlopperConfig;
+import org.cyclops.flopper.blockentity.BlockEntityFlopperConfig;
 
 /**
  * The main mod class of this mod.
@@ -41,7 +41,7 @@ public class Flopper extends ModBaseVersionable<Flopper> {
     }
 
     @Override
-    protected ItemGroup constructDefaultItemGroup() {
+    protected CreativeModeTab constructDefaultCreativeModeTab() {
         return new ItemGroupMod(this, () -> RegistryEntries.ITEM_FLOPPER);
     }
 
@@ -52,7 +52,7 @@ public class Flopper extends ModBaseVersionable<Flopper> {
         configHandler.addConfigurable(new GeneralConfig());
 
         configHandler.addConfigurable(new BlockFlopperConfig());
-        configHandler.addConfigurable(new TileFlopperConfig());
+        configHandler.addConfigurable(new BlockEntityFlopperConfig());
     }
 
     /**

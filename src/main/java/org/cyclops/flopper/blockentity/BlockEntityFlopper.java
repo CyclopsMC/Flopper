@@ -1,59 +1,52 @@
-package org.cyclops.flopper.tileentity;
+package org.cyclops.flopper.blockentity;
 
 import lombok.experimental.Delegate;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.IWaterLoggable;
-import net.minecraft.block.material.Material;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
+import org.cyclops.cyclopscore.blockentity.BlockEntityTickerDelayed;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
 import org.cyclops.cyclopscore.fluid.Tank;
 import org.cyclops.cyclopscore.helper.BlockHelpers;
-import org.cyclops.cyclopscore.helper.TileHelpers;
+import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
 import org.cyclops.cyclopscore.persist.nbt.NBTPersist;
-import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity;
+import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.block.BlockFlopper;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 
 import java.util.Optional;
 
-import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity.ITickingTile;
-import org.cyclops.cyclopscore.tileentity.CyclopsTileEntity.TickingTileComponent;
-
 /**
  * Fluid hopper tile.
  * @author rubensworks
  */
-public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.ITickingTile {
+public class BlockEntityFlopper extends CyclopsBlockEntity {
 
-    @Delegate
-    private final ITickingTile tickingTileComponent = new TickingTileComponent(this);
-
-    @NBTPersist
-    private int transferCooldown = -1;
     private Tank tank;
 
-    public TileFlopper() {
-        super(RegistryEntries.TILE_ENTITY_FLOPPER);
+    public BlockEntityFlopper(BlockPos blockPos, BlockState blockState) {
+        super(RegistryEntries.BLOCK_ENTITY_FLOPPER, blockPos, blockState);
         tank = new SingleUseTank(BlockFlopperConfig.capacityMb) {
             @Override
             protected void sendUpdate() {
                 super.sendUpdate();
-                TileFlopper.this.sendUpdate();
+                BlockEntityFlopper.this.sendUpdate();
             }
         };
         addCapabilityInternal(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, LazyOptional.of(this::getTank));
@@ -64,72 +57,17 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     }
 
     @Override
-    public void read(CompoundNBT tag) {
+    public void read(CompoundTag tag) {
         super.read(tag);
         tank.readFromNBT(tag.getCompound("tank"));
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT tag) {
-        CompoundNBT tagTank = new CompoundNBT();
+    public CompoundTag save(CompoundTag tag) {
+        CompoundTag tagTank = new CompoundTag();
         tank.writeToNBT(tagTank);
         tag.put("tank", tagTank);
         return super.save(tag);
-    }
-
-    @Override
-    protected void updateTileEntity() {
-        super.updateTileEntity();
-
-        if (this.level != null && !this.level.isClientSide) {
-            --this.transferCooldown;
-            if (!this.isOnTransferCooldown()) {
-                this.setTransferCooldown(0);
-                this.updateHopper();
-            }
-        }
-    }
-
-    public void setTransferCooldown(int ticks) {
-        this.transferCooldown = ticks;
-    }
-
-    private boolean isOnTransferCooldown() {
-        return this.transferCooldown > 0;
-    }
-
-    protected boolean updateHopper() {
-        if (this.level != null && !this.level.isClientSide) {
-            if (!this.isOnTransferCooldown() && BlockHelpers.getSafeBlockStateProperty(
-                    getLevel().getBlockState(getBlockPos()), BlockFlopper.ENABLED, false)) {
-                boolean worked = false;
-                boolean workedWorld = false;
-
-                // Push fluids
-                if (!this.tank.isEmpty()) {
-                    worked = (BlockFlopperConfig.pushFluidRate > 0 && this.pushFluidsToTank())
-                            || (workedWorld = (BlockFlopperConfig.pushFluidsWorld && this.pushFluidsToWorld()));
-                }
-
-                // Pull fluids
-                if (!this.tank.isFull()) {
-                    worked = (BlockFlopperConfig.pullFluidRate > 0 && pullFluidsFromTank())
-                            || (workedWorld = (BlockFlopperConfig.pullFluidsWorld && this.pullFluidsFromWorld()) || workedWorld)
-                            || worked;
-                }
-
-                if (worked) {
-                    this.setTransferCooldown(workedWorld
-                            ? BlockFlopperConfig.workWorldCooldown : BlockFlopperConfig.workCooldown);
-                    this.setChanged();
-                    return true;
-                }
-            }
-
-            return false;
-        } else {
-            return false;
-        }
     }
 
     protected Direction getFacing() {
@@ -143,7 +81,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
         BlockPos targetPos = getBlockPos().relative(getFacing());
-        return TileHelpers.getCapability(level, targetPos, targetSide, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        return BlockEntityHelpers.getCapability(level, targetPos, targetSide, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(fluidHandler, tank, BlockFlopperConfig.pushFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -154,7 +92,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
      */
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
-        return TileHelpers.getCapability(level, targetPos, Direction.DOWN, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -180,7 +118,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
                             if (!moved.isEmpty()) {
                                 if (BlockFlopperConfig.worldPullPushSounds) {
                                     SoundEvent soundevent = moved.getFluid().getAttributes().getFillSound(moved);
-                                    level.playSound(null, worldPosition, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                                    level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                                 }
                                 if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
                                     level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
@@ -196,7 +134,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
         return false;
     }
 
-    private Optional<IFluidHandler> getFluidBlockHandler(Fluid fluid, World world, BlockPos targetPos) {
+    private Optional<IFluidHandler> getFluidBlockHandler(Fluid fluid, Level world, BlockPos targetPos) {
         if (!fluid.getAttributes().canBePlacedInWorld(world, targetPos, fluid.defaultFluidState())) {
             return Optional.empty();
         }
@@ -217,7 +155,7 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
                     if (!moved.isEmpty()) {
                         if (BlockFlopperConfig.worldPullPushSounds) {
                             SoundEvent soundevent = moved.getFluid().getAttributes().getEmptySound(moved);
-                            level.playSound(null, worldPosition, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                            level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                         }
                         if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
                             level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
@@ -229,10 +167,69 @@ public class TileFlopper extends CyclopsTileEntity implements CyclopsTileEntity.
                 .orElse(false);
     }
 
-    private LazyOptional<IFluidHandler> wrapFluidBlock(BlockState blockState, World world, BlockPos targetPos) {
-        if (blockState.getBlock() instanceof FlowingFluidBlock || blockState.getBlock() instanceof IWaterLoggable) {
+    private LazyOptional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {
+        if (blockState.getBlock() instanceof LiquidBlock || blockState.getBlock() instanceof SimpleWaterloggedBlock) {
             return LazyOptional.of(() -> new FluidHandlerBlock(blockState, world, targetPos));
         }
         return LazyOptional.empty();
+    }
+
+    public static class Ticker extends BlockEntityTickerDelayed<BlockEntityFlopper> {
+        @NBTPersist
+        private int transferCooldown = -1;
+
+        @Override
+        protected void update(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
+            super.update(level, pos, blockState, blockEntity);
+
+            if (level != null && !level.isClientSide) {
+                --this.transferCooldown;
+                if (!this.isOnTransferCooldown()) {
+                    this.setTransferCooldown(0);
+                    this.updateHopper(level, pos, blockState, blockEntity);
+                }
+            }
+        }
+
+        public void setTransferCooldown(int ticks) {
+            this.transferCooldown = ticks;
+        }
+
+        private boolean isOnTransferCooldown() {
+            return this.transferCooldown > 0;
+        }
+
+        protected boolean updateHopper(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
+            if (level != null && !level.isClientSide) {
+                if (!this.isOnTransferCooldown() && BlockHelpers.getSafeBlockStateProperty(blockState, BlockFlopper.ENABLED, false)) {
+                    boolean worked = false;
+                    boolean workedWorld = false;
+
+                    // Push fluids
+                    if (!blockEntity.getTank().isEmpty()) {
+                        worked = (BlockFlopperConfig.pushFluidRate > 0 && blockEntity.pushFluidsToTank())
+                                || (workedWorld = (BlockFlopperConfig.pushFluidsWorld && blockEntity.pushFluidsToWorld()));
+                    }
+
+                    // Pull fluids
+                    if (!blockEntity.getTank().isFull()) {
+                        worked = (BlockFlopperConfig.pullFluidRate > 0 && blockEntity.pullFluidsFromTank())
+                                || (workedWorld = (BlockFlopperConfig.pullFluidsWorld && blockEntity.pullFluidsFromWorld()) || workedWorld)
+                                || worked;
+                    }
+
+                    if (worked) {
+                        this.setTransferCooldown(workedWorld
+                                ? BlockFlopperConfig.workWorldCooldown : BlockFlopperConfig.workCooldown);
+                        blockEntity.setChanged();
+                        return true;
+                    }
+                }
+
+                return false;
+            } else {
+                return false;
+            }
+        }
     }
 }
