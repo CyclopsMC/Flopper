@@ -20,7 +20,7 @@ import org.cyclops.flopper.blockentity.BlockEntityFlopperConfig;
  */
 @Mod(Reference.MOD_ID)
 public class Flopper extends ModBaseVersionable<Flopper> {
-    
+
     /**
      * The unique instance of this mod.
      */
@@ -62,7 +62,7 @@ public class Flopper extends ModBaseVersionable<Flopper> {
     public static void clog(String message) {
         clog(Level.INFO, message);
     }
-    
+
     /**
      * Log a new message of the given level for this mod.
      * @param level The level in which the message must be shown.
@@ -71,5 +71,5 @@ public class Flopper extends ModBaseVersionable<Flopper> {
     public static void clog(Level level, String message) {
         Flopper._instance.getLoggerHelper().log(level, message);
     }
-    
+
 }

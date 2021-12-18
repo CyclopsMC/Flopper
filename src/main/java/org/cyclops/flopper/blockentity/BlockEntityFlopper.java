@@ -1,6 +1,5 @@
 package org.cyclops.flopper.blockentity;
 
-import lombok.experimental.Delegate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;

@@ -17,7 +17,7 @@ import org.cyclops.flopper.blockentity.BlockEntityFlopper;
 
 /**
  * Renderer for the item inside the {@link org.cyclops.flopper.block.BlockFlopper}.
- * 
+ *
  * @author rubensworks
  *
  */
