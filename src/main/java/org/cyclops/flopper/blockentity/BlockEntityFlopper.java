@@ -1,17 +1,17 @@
 package org.cyclops.flopper.blockentity;
 
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -19,12 +19,12 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
 import org.cyclops.cyclopscore.blockentity.BlockEntityTickerDelayed;
+import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
 import org.cyclops.cyclopscore.fluid.Tank;
-import org.cyclops.cyclopscore.helper.BlockHelpers;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
+import org.cyclops.cyclopscore.helper.BlockHelpers;
 import org.cyclops.cyclopscore.persist.nbt.NBTPersist;
-import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.block.BlockFlopper;
 import org.cyclops.flopper.block.BlockFlopperConfig;
@@ -38,6 +38,9 @@ import java.util.Optional;
 public class BlockEntityFlopper extends CyclopsBlockEntity {
 
     private Tank tank;
+
+    @NBTPersist
+    private int transferCooldown = -1;
 
     public BlockEntityFlopper(BlockPos blockPos, BlockState blockState) {
         super(RegistryEntries.BLOCK_ENTITY_FLOPPER, blockPos, blockState);
@@ -53,6 +56,14 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
 
     public Tank getTank() {
         return tank;
+    }
+
+    public void setTransferCooldown(int ticks) {
+        this.transferCooldown = ticks;
+    }
+
+    public int getTransferCooldown() {
+        return transferCooldown;
     }
 
     @Override
@@ -174,33 +185,26 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     }
 
     public static class Ticker extends BlockEntityTickerDelayed<BlockEntityFlopper> {
-        @NBTPersist
-        private int transferCooldown = -1;
-
         @Override
         protected void update(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
             super.update(level, pos, blockState, blockEntity);
 
             if (level != null && !level.isClientSide) {
-                --this.transferCooldown;
-                if (!this.isOnTransferCooldown()) {
-                    this.setTransferCooldown(0);
+                blockEntity.setTransferCooldown(blockEntity.getTransferCooldown() - 1);
+                if (!this.isOnTransferCooldown(blockEntity)) {
+                    blockEntity.setTransferCooldown(0);
                     this.updateHopper(level, pos, blockState, blockEntity);
                 }
             }
         }
 
-        public void setTransferCooldown(int ticks) {
-            this.transferCooldown = ticks;
-        }
-
-        private boolean isOnTransferCooldown() {
-            return this.transferCooldown > 0;
+        private boolean isOnTransferCooldown(BlockEntityFlopper blockEntity) {
+            return blockEntity.getTransferCooldown() > 0;
         }
 
         protected boolean updateHopper(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
             if (level != null && !level.isClientSide) {
-                if (!this.isOnTransferCooldown() && BlockHelpers.getSafeBlockStateProperty(blockState, BlockFlopper.ENABLED, false)) {
+                if (!this.isOnTransferCooldown(blockEntity) && BlockHelpers.getSafeBlockStateProperty(blockState, BlockFlopper.ENABLED, false)) {
                     boolean worked = false;
                     boolean workedWorld = false;
 
@@ -218,7 +222,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                     }
 
                     if (worked) {
-                        this.setTransferCooldown(workedWorld
+                        blockEntity.setTransferCooldown(workedWorld
                                 ? BlockFlopperConfig.workWorldCooldown : BlockFlopperConfig.workCooldown);
                         blockEntity.setChanged();
                         return true;
