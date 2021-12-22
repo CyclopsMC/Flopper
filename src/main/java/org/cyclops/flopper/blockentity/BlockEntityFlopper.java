@@ -73,11 +73,11 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
         CompoundTag tagTank = new CompoundTag();
         tank.writeToNBT(tagTank);
         tag.put("tank", tagTank);
-        return super.save(tag);
     }
 
     protected Direction getFacing() {
