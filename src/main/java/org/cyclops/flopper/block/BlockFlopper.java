@@ -210,7 +210,7 @@ public class BlockFlopper extends BlockTile {
                             if (result.isSuccess()) {
                                 ItemStack drainedItem = result.getResult();
                                 if (!player.isCreative()) {
-                                    InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem);
+                                    InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem, hand);
                                 }
                             }
                             return ActionResultType.SUCCESS;
@@ -221,7 +221,7 @@ public class BlockFlopper extends BlockTile {
                             if (result.isSuccess()) {
                                 ItemStack filledItem = result.getResult();
                                 if (!player.isCreative()) {
-                                    InventoryHelpers.tryReAddToStack(player, itemStack, filledItem);
+                                    InventoryHelpers.tryReAddToStack(player, itemStack, filledItem, hand);
                                 }
                             }
                             return ActionResultType.SUCCESS;
