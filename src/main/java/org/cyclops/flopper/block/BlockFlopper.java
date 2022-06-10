@@ -2,8 +2,7 @@ package org.cyclops.flopper.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -201,11 +200,11 @@ public class BlockFlopper extends BlockWithEntity {
                             // If the hand is empty, show the tank contents
                             FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
                             if (fluidStack.isEmpty()) {
-                                player.displayClientMessage(new TextComponent("0 / "
+                                player.displayClientMessage(Component.literal("0 / "
                                         + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
                             } else {
-                                player.displayClientMessage(new TranslatableComponent(fluidStack.getTranslationKey())
-                                        .append(new TextComponent(": "
+                                player.displayClientMessage(Component.translatable(fluidStack.getTranslationKey())
+                                        .append(Component.literal(": "
                                                 + String.format("%,d", fluidStack.getAmount()) + " / "
                                                 + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
                             }
