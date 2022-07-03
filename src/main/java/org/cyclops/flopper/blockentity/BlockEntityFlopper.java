@@ -18,6 +18,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
+import net.minecraftforge.common.SoundActions;
 import org.cyclops.cyclopscore.blockentity.BlockEntityTickerDelayed;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
@@ -121,13 +122,13 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 || (isDestNonSolid && isDestReplaceable && !destMaterial.isLiquid())) {
             FluidStack fluidStack = tank.getFluid();
 
-            if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getAttributes().doesVaporize(level, worldPosition, fluidStack)) {
+            if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {
                 return getFluidBlockHandler(fluidStack.getFluid(), level, targetPos)
                         .map(fluidHandler -> {
                             FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
                             if (!moved.isEmpty()) {
                                 if (BlockFlopperConfig.worldPullPushSounds) {
-                                    SoundEvent soundevent = moved.getFluid().getAttributes().getFillSound(moved);
+                                    SoundEvent soundevent = moved.getFluid().getFluidType().getSound(SoundActions.BUCKET_FILL);
                                     level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                                 }
                                 if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
@@ -145,10 +146,10 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     }
 
     private Optional<IFluidHandler> getFluidBlockHandler(Fluid fluid, Level world, BlockPos targetPos) {
-        if (!fluid.getAttributes().canBePlacedInWorld(world, targetPos, fluid.defaultFluidState())) {
+        if (!fluid.getFluidType().canBePlacedInLevel(world, targetPos, fluid.defaultFluidState())) {
             return Optional.empty();
         }
-        BlockState state = fluid.getAttributes().getBlock(world, targetPos, fluid.defaultFluidState());
+        BlockState state = fluid.getFluidType().getBlockForFluidState(world, targetPos, fluid.defaultFluidState());
         return Optional.of(new BlockWrapper(state, world, targetPos));
     }
 
@@ -164,7 +165,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                     FluidStack moved = FluidUtil.tryFluidTransfer(tank, fluidHandler, Integer.MAX_VALUE, true);
                     if (!moved.isEmpty()) {
                         if (BlockFlopperConfig.worldPullPushSounds) {
-                            SoundEvent soundevent = moved.getFluid().getAttributes().getEmptySound(moved);
+                            SoundEvent soundevent = moved.getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
                             level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                         }
                         if (BlockFlopperConfig.worldPullPushNeighbourEvents) {

@@ -60,7 +60,7 @@ sourceSets {
 
 repositories {
     mavenCentral()
-	mavenLocal()
+    mavenLocal()
     maven {
         name "Cyclops Repo"
         url "https://maven.pkg.github.com/CyclopsMC/packages"

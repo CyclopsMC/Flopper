@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cyclops.cyclopscore.helper.Helpers;
@@ -33,12 +35,13 @@ public class RenderBlockEntityFlopper implements BlockEntityRenderer<BlockEntity
             FluidStack fluid = tile.getTank().getFluid();
             RenderHelpers.renderFluidContext(fluid, matrixStack, () -> {
                 float height = (fluid.getAmount() * 0.3125F) / tile.getTank().getCapacity() + 0.6875F;
-                int brightness = Math.max(combinedLight, fluid.getFluid().getAttributes().getLuminosity(fluid));
+                int brightness = Math.max(combinedLight, fluid.getFluid().getFluidType().getLightLevel(fluid));
                 int l2 = brightness >> 0x10 & 0xFFFF;
                 int i3 = brightness & 0xFFFF;
 
                 TextureAtlasSprite icon = RenderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
-                Triple<Float, Float, Float> color = Helpers.intToRGB(fluid.getFluid().getAttributes().getColor(tile.getLevel(), tile.getBlockPos()));
+                IFluidTypeRenderProperties renderProperties = RenderProperties.get(fluid.getFluid());
+                Triple<Float, Float, Float> color = Helpers.intToRGB(renderProperties.getColorTint(fluid.getFluid().defaultFluidState(), tile.getLevel(), tile.getBlockPos()));
 
                 VertexConsumer vb = buffer.getBuffer(RenderType.text(icon.atlas().location()));
                 Matrix4f matrix = matrixStack.last().pose();
