@@ -281,7 +281,7 @@ public class BlockFlopper extends BlockWithEntity {
     public void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         // Force allow shift-right clicking with a fluid container passing through to this block
         if (!event.getItemStack().isEmpty()
-                && event.getWorld().getBlockState(event.getPos()).getBlock() == this
+                && event.getLevel().getBlockState(event.getPos()).getBlock() == this
                 && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
             event.setUseBlock(Event.Result.ALLOW);
         }
