@@ -1,17 +1,17 @@
 package org.cyclops.flopper;
 
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
-import org.cyclops.cyclopscore.init.ItemGroupMod;
 import org.cyclops.cyclopscore.init.ModBaseVersionable;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.flopper.block.BlockFlopperConfig;
+import org.cyclops.flopper.blockentity.BlockEntityFlopperConfig;
 import org.cyclops.flopper.proxy.ClientProxy;
 import org.cyclops.flopper.proxy.CommonProxy;
-import org.cyclops.flopper.blockentity.BlockEntityFlopperConfig;
 
 /**
  * The main mod class of this mod.
@@ -41,8 +41,14 @@ public class Flopper extends ModBaseVersionable<Flopper> {
     }
 
     @Override
-    protected CreativeModeTab constructDefaultCreativeModeTab() {
-        return new ItemGroupMod(this, () -> RegistryEntries.ITEM_FLOPPER);
+    protected boolean hasDefaultCreativeModeTab() {
+        return true;
+    }
+
+    @Override
+    protected CreativeModeTab.Builder constructDefaultCreativeModeTab(CreativeModeTab.Builder builder) {
+        return super.constructDefaultCreativeModeTab(builder)
+                .icon(() -> new ItemStack(RegistryEntries.ITEM_FLOPPER));
     }
 
     @Override
