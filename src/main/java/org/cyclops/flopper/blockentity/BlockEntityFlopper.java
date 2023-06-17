@@ -11,11 +11,11 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
 import net.minecraftforge.common.SoundActions;
@@ -52,7 +52,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 BlockEntityFlopper.this.sendUpdate();
             }
         };
-        addCapabilityInternal(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, LazyOptional.of(this::getTank));
+        addCapabilityInternal(ForgeCapabilities.FLUID_HANDLER, LazyOptional.of(this::getTank));
     }
 
     public Tank getTank() {
@@ -92,7 +92,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
         BlockPos targetPos = getBlockPos().relative(getFacing());
-        return BlockEntityHelpers.getCapability(level, targetPos, targetSide, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        return BlockEntityHelpers.getCapability(level, targetPos, targetSide, ForgeCapabilities.FLUID_HANDLER)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(fluidHandler, tank, BlockFlopperConfig.pushFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -103,7 +103,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
      */
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
-        return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, ForgeCapabilities.FLUID_HANDLER)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -115,11 +115,10 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     protected boolean pushFluidsToWorld() {
         BlockPos targetPos = getBlockPos().relative(getFacing());
         BlockState destBlockState = level.getBlockState(targetPos);
-        final Material destMaterial = destBlockState.getMaterial();
-        final boolean isDestNonSolid = !destMaterial.isSolid();
-        final boolean isDestReplaceable = destBlockState.getMaterial().isReplaceable();
+        final boolean isDestNonSolid = !destBlockState.isSolid();
+        final boolean isDestReplaceable = destBlockState.getPistonPushReaction() == PushReaction.DESTROY;
         if (level.isEmptyBlock(targetPos)
-                || (isDestNonSolid && isDestReplaceable && !destMaterial.isLiquid())) {
+                || (isDestNonSolid && isDestReplaceable && !destBlockState.liquid())) {
             FluidStack fluidStack = tank.getFluid();
 
             if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {

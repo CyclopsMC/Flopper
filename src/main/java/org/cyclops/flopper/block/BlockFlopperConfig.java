@@ -2,8 +2,7 @@ package org.cyclops.flopper.block;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.fml.config.ModConfig;
 import org.cyclops.cyclopscore.config.ConfigurableProperty;
 import org.cyclops.cyclopscore.config.extendedconfig.BlockConfig;
@@ -54,8 +53,8 @@ public class BlockFlopperConfig extends BlockConfig {
         super(
                 Flopper._instance,
                 "flopper",
-                eConfig -> new BlockFlopper(Block.Properties
-                        .of(Material.METAL, MaterialColor.STONE)
+                eConfig -> new BlockFlopper(Block.Properties.of()
+                        .mapColor(MapColor.STONE)
                         .strength(3.0F, 4.8F)
                         .sound(SoundType.METAL), BlockEntityFlopper::new),
                 getDefaultItemConstructor(Flopper._instance)

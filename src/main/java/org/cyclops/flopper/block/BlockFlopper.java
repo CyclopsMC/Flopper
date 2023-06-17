@@ -32,16 +32,16 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.SoundActions;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.common.SoundActions;
 import org.cyclops.cyclopscore.block.BlockWithEntity;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
@@ -193,7 +193,7 @@ public class BlockFlopper extends BlockWithEntity {
         if (activatedSuper.consumesAction()) {
             return activatedSuper;
         }
-        return BlockEntityHelpers.getCapability(world, blockPos, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        return BlockEntityHelpers.getCapability(world, blockPos, ForgeCapabilities.FLUID_HANDLER)
                 .map(fluidHandler -> {
                     ItemStack itemStack = player.getItemInHand(hand);
                     if (itemStack.isEmpty()) {
@@ -256,7 +256,7 @@ public class BlockFlopper extends BlockWithEntity {
                     if (doDrain && player != null)
                     {
                         SoundEvent soundevent = transfer.getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
-                        player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
 
                     ItemStack resultContainer = containerFluidHandler.getContainer();
@@ -282,7 +282,7 @@ public class BlockFlopper extends BlockWithEntity {
         // Force allow shift-right clicking with a fluid container passing through to this block
         if (!event.getItemStack().isEmpty()
                 && event.getLevel().getBlockState(event.getPos()).getBlock() == this
-                && event.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+                && event.getItemStack().getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent()) {
             event.setUseBlock(Event.Result.ALLOW);
         }
     }
