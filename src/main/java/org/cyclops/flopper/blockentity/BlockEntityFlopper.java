@@ -128,7 +128,9 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                             if (!moved.isEmpty()) {
                                 if (BlockFlopperConfig.worldPullPushSounds) {
                                     SoundEvent soundevent = moved.getFluid().getFluidType().getSound(SoundActions.BUCKET_FILL);
-                                    level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                                    if (soundevent != null) {
+                                        level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                                    }
                                 }
                                 if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
                                     level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
@@ -165,7 +167,9 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                     if (!moved.isEmpty()) {
                         if (BlockFlopperConfig.worldPullPushSounds) {
                             SoundEvent soundevent = moved.getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
-                            level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                            if (soundevent != null) {
+                                level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                            }
                         }
                         if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
                             level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
