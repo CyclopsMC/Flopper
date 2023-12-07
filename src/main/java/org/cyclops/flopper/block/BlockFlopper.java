@@ -256,7 +256,9 @@ public class BlockFlopper extends BlockWithEntity {
                     if (doDrain && player != null)
                     {
                         SoundEvent soundevent = transfer.getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
-                        player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        if (soundevent != null) {
+                            player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        }
                     }
 
                     ItemStack resultContainer = containerFluidHandler.getContainer();
