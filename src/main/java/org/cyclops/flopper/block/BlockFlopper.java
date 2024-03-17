@@ -1,5 +1,6 @@
 package org.cyclops.flopper.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
@@ -31,17 +33,17 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.SoundActions;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.cyclops.cyclopscore.block.BlockWithEntity;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
@@ -59,6 +61,8 @@ import java.util.function.BiFunction;
  * @author rubensworks
  */
 public class BlockFlopper extends BlockWithEntity {
+
+    public static final MapCodec<BlockFlopper> CODEC = simpleCodec(properties -> new BlockFlopper(properties, BlockEntityFlopper::new));
 
     public static final DirectionProperty FACING = BlockStateProperties.FACING_HOPPER;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
@@ -81,16 +85,21 @@ public class BlockFlopper extends BlockWithEntity {
 
     public BlockFlopper(Properties properties, BiFunction<BlockPos, BlockState, CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.DOWN)
                 .setValue(ENABLED, true));
     }
 
     @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
+    @Override
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        return level.isClientSide ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_FLOPPER, new BlockEntityFlopper.Ticker());
+        return level.isClientSide ? null : createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_FLOPPER.get(), new BlockEntityFlopper.Ticker());
     }
 
     @Override
@@ -193,7 +202,7 @@ public class BlockFlopper extends BlockWithEntity {
         if (activatedSuper.consumesAction()) {
             return activatedSuper;
         }
-        return BlockEntityHelpers.getCapability(world, blockPos, ForgeCapabilities.FLUID_HANDLER)
+        return BlockEntityHelpers.getCapability(world, blockPos, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> {
                     ItemStack itemStack = player.getItemInHand(hand);
                     if (itemStack.isEmpty()) {
@@ -284,7 +293,7 @@ public class BlockFlopper extends BlockWithEntity {
         // Force allow shift-right clicking with a fluid container passing through to this block
         if (!event.getItemStack().isEmpty()
                 && event.getLevel().getBlockState(event.getPos()).getBlock() == this
-                && event.getItemStack().getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent()) {
+                && event.getItemStack().getCapability(Capabilities.FluidHandler.ITEM) != null) {
             event.setUseBlock(Event.Result.ALLOW);
         }
     }

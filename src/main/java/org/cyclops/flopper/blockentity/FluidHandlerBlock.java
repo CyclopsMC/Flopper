@@ -9,8 +9,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.cyclops.cyclopscore.helper.FluidHelpers;
 
 import javax.annotation.Nonnull;
@@ -96,7 +96,7 @@ public class FluidHandlerBlock implements IFluidHandler {
                 && block instanceof SimpleWaterloggedBlock
                 && maxDrain >= FluidHelpers.BUCKET_VOLUME) {
             if (action.execute()) {
-                ((SimpleWaterloggedBlock) block).pickupBlock(world, blockPos, state);
+                ((SimpleWaterloggedBlock) block).pickupBlock(null, world, blockPos, state);
             }
             return new FluidStack(Fluids.WATER, FluidHelpers.BUCKET_VOLUME);
         }

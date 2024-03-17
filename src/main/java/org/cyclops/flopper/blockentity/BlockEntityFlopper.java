@@ -12,13 +12,12 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
-import net.minecraftforge.common.SoundActions;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.wrappers.BlockWrapper;
 import org.cyclops.cyclopscore.blockentity.BlockEntityTickerDelayed;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
@@ -44,7 +43,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     private int transferCooldown = -1;
 
     public BlockEntityFlopper(BlockPos blockPos, BlockState blockState) {
-        super(RegistryEntries.BLOCK_ENTITY_FLOPPER, blockPos, blockState);
+        super(RegistryEntries.BLOCK_ENTITY_FLOPPER.get(), blockPos, blockState);
         tank = new SingleUseTank(BlockFlopperConfig.capacityMb) {
             @Override
             protected void sendUpdate() {
@@ -52,7 +51,6 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 BlockEntityFlopper.this.sendUpdate();
             }
         };
-        addCapabilityInternal(ForgeCapabilities.FLUID_HANDLER, LazyOptional.of(this::getTank));
     }
 
     public Tank getTank() {
@@ -92,7 +90,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
         BlockPos targetPos = getBlockPos().relative(getFacing());
-        return BlockEntityHelpers.getCapability(level, targetPos, targetSide, ForgeCapabilities.FLUID_HANDLER)
+        return BlockEntityHelpers.getCapability(level, targetPos, targetSide, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(fluidHandler, tank, BlockFlopperConfig.pushFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -103,7 +101,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
      */
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
-        return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, ForgeCapabilities.FLUID_HANDLER)
+        return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -181,11 +179,11 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 .orElse(false);
     }
 
-    private LazyOptional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {
+    private Optional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {
         if (blockState.getBlock() instanceof LiquidBlock || blockState.getBlock() instanceof SimpleWaterloggedBlock) {
-            return LazyOptional.of(() -> new FluidHandlerBlock(blockState, world, targetPos));
+            return Optional.of(new FluidHandlerBlock(blockState, world, targetPos));
         }
-        return LazyOptional.empty();
+        return Optional.empty();
     }
 
     public static class Ticker extends BlockEntityTickerDelayed<BlockEntityFlopper> {

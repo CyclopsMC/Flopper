@@ -2,8 +2,10 @@ package org.cyclops.flopper.blockentity;
 
 import com.google.common.collect.Sets;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.cyclops.cyclopscore.config.extendedconfig.BlockEntityConfig;
 import org.cyclops.flopper.Flopper;
 import org.cyclops.flopper.RegistryEntries;
@@ -22,8 +24,9 @@ public class BlockEntityFlopperConfig extends BlockEntityConfig<BlockEntityFlopp
                 Flopper._instance,
                 "flopper",
                 (eConfig) -> new BlockEntityType<>(BlockEntityFlopper::new,
-                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER), null)
+                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.get()), null)
         );
+        Flopper._instance.getModEventBus().addListener(this::registerCapabilities);
     }
 
     @Override
@@ -33,5 +36,13 @@ public class BlockEntityFlopperConfig extends BlockEntityConfig<BlockEntityFlopp
         if (BlockFlopperConfig.renderFluid) {
             getMod().getProxy().registerRenderer(getInstance(), RenderBlockEntityFlopper::new);
         }
+    }
+
+    public void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                getInstance(),
+                (blockEntity, context) -> blockEntity.getTank()
+        );
     }
 }

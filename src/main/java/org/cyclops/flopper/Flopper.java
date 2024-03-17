@@ -2,7 +2,8 @@ package org.cyclops.flopper;
 
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.Level;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.init.ModBaseVersionable;
@@ -26,8 +27,8 @@ public class Flopper extends ModBaseVersionable<Flopper> {
      */
     public static Flopper _instance;
 
-    public Flopper() {
-        super(Reference.MOD_ID, (instance) -> _instance = instance);
+    public Flopper(IEventBus modEventBus) {
+        super(Reference.MOD_ID, (instance) -> _instance = instance, modEventBus);
     }
 
     @Override

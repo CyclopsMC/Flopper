@@ -1,9 +1,11 @@
 package org.cyclops.flopper;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.ObjectHolder;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.cyclops.flopper.blockentity.BlockEntityFlopper;
 
 /**
@@ -12,11 +14,8 @@ import org.cyclops.flopper.blockentity.BlockEntityFlopper;
  */
 public class RegistryEntries {
 
-    @ObjectHolder(registryName = "item", value = "flopper:flopper")
-    public static final Item ITEM_FLOPPER = null;
-    @ObjectHolder(registryName = "block", value = "flopper:flopper")
-    public static final Block BLOCK_FLOPPER = null;
-    @ObjectHolder(registryName = "block_entity_type", value = "flopper:flopper")
-    public static final BlockEntityType<BlockEntityFlopper> BLOCK_ENTITY_FLOPPER = null;
+    public static final DeferredHolder<Item, Item> ITEM_FLOPPER = DeferredHolder.create(Registries.ITEM, new ResourceLocation("flopper:flopper"));
+    public static final DeferredHolder<Block, Block> BLOCK_FLOPPER = DeferredHolder.create(Registries.BLOCK, new ResourceLocation("flopper:flopper"));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityFlopper>> BLOCK_ENTITY_FLOPPER = DeferredHolder.create(Registries.BLOCK_ENTITY_TYPE, new ResourceLocation("flopper:flopper"));
 
 }
