@@ -2,6 +2,7 @@ package org.cyclops.flopper.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -66,16 +67,16 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
     }
 
     @Override
-    public void read(CompoundTag tag) {
-        super.read(tag);
-        tank.readFromNBT(tag.getCompound("tank"));
+    public void read(CompoundTag tag, HolderLookup.Provider provider) {
+        super.read(tag, provider);
+        tank.readFromNBT(provider, tag.getCompound("tank"));
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+        super.saveAdditional(tag, provider);
         CompoundTag tagTank = new CompoundTag();
-        tank.writeToNBT(tagTank);
+        tank.writeToNBT(provider, tagTank);
         tag.put("tank", tagTank);
     }
 

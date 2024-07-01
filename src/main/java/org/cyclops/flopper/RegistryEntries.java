@@ -14,8 +14,8 @@ import org.cyclops.flopper.blockentity.BlockEntityFlopper;
  */
 public class RegistryEntries {
 
-    public static final DeferredHolder<Item, Item> ITEM_FLOPPER = DeferredHolder.create(Registries.ITEM, new ResourceLocation("flopper:flopper"));
-    public static final DeferredHolder<Block, Block> BLOCK_FLOPPER = DeferredHolder.create(Registries.BLOCK, new ResourceLocation("flopper:flopper"));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityFlopper>> BLOCK_ENTITY_FLOPPER = DeferredHolder.create(Registries.BLOCK_ENTITY_TYPE, new ResourceLocation("flopper:flopper"));
+    public static final DeferredHolder<Item, Item> ITEM_FLOPPER = DeferredHolder.create(Registries.ITEM, ResourceLocation.parse("flopper:flopper"));
+    public static final DeferredHolder<Block, Block> BLOCK_FLOPPER = DeferredHolder.create(Registries.BLOCK, ResourceLocation.parse("flopper:flopper"));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityFlopper>> BLOCK_ENTITY_FLOPPER = DeferredHolder.create(Registries.BLOCK_ENTITY_TYPE, ResourceLocation.parse("flopper:flopper"));
 
 }

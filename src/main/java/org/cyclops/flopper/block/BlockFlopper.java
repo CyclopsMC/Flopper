@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -21,7 +22,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,17 +33,16 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.cyclops.cyclopscore.block.BlockWithEntity;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
@@ -68,20 +67,21 @@ public class BlockFlopper extends BlockWithEntity {
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
     // Copied from HopperBlock, to avoid conflicts with other mods messing with the hopper
-    private static final VoxelShape INPUT_SHAPE = Block.box(0.0D, 10.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-    private static final VoxelShape MIDDLE_SHAPE = Block.box(4.0D, 4.0D, 4.0D, 12.0D, 10.0D, 12.0D);
-    private static final VoxelShape INPUT_MIDDLE_SHAPE = Shapes.or(MIDDLE_SHAPE, INPUT_SHAPE);
-    private static final VoxelShape BASE_SHAPE = Shapes.join(INPUT_MIDDLE_SHAPE, Hopper.INSIDE, BooleanOp.ONLY_FIRST);
-    private static final VoxelShape DOWN_SHAPE = Shapes.or(BASE_SHAPE, Block.box(6.0D, 0.0D, 6.0D, 10.0D, 4.0D, 10.0D));
-    private static final VoxelShape EAST_SHAPE = Shapes.or(BASE_SHAPE, Block.box(12.0D, 4.0D, 6.0D, 16.0D, 8.0D, 10.0D));
-    private static final VoxelShape NORTH_SHAPE = Shapes.or(BASE_SHAPE, Block.box(6.0D, 4.0D, 0.0D, 10.0D, 8.0D, 4.0D));
-    private static final VoxelShape SOUTH_SHAPE = Shapes.or(BASE_SHAPE, Block.box(6.0D, 4.0D, 12.0D, 10.0D, 8.0D, 16.0D));
-    private static final VoxelShape WEST_SHAPE = Shapes.or(BASE_SHAPE, Block.box(0.0D, 4.0D, 6.0D, 4.0D, 8.0D, 10.0D));
-    private static final VoxelShape DOWN_RAYTRACE_SHAPE = Hopper.INSIDE;
-    private static final VoxelShape EAST_RAYTRACE_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(12.0D, 8.0D, 6.0D, 16.0D, 10.0D, 10.0D));
-    private static final VoxelShape NORTH_RAYTRACE_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(6.0D, 8.0D, 0.0D, 10.0D, 10.0D, 4.0D));
-    private static final VoxelShape SOUTH_RAYTRACE_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(6.0D, 8.0D, 12.0D, 10.0D, 10.0D, 16.0D));
-    private static final VoxelShape WEST_RAYTRACE_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(0.0D, 8.0D, 6.0D, 4.0D, 10.0D, 10.0D));
+    private static final VoxelShape TOP = Block.box(0.0, 10.0, 0.0, 16.0, 16.0, 16.0);
+    private static final VoxelShape FUNNEL = Block.box(4.0, 4.0, 4.0, 12.0, 10.0, 12.0);
+    private static final VoxelShape CONVEX_BASE = Shapes.or(FUNNEL, TOP);
+    private static final VoxelShape INSIDE = box(2.0, 11.0, 2.0, 14.0, 16.0, 14.0);
+    private static final VoxelShape BASE = Shapes.join(CONVEX_BASE, INSIDE, BooleanOp.ONLY_FIRST);
+    private static final VoxelShape DOWN_SHAPE = Shapes.or(BASE, Block.box(6.0, 0.0, 6.0, 10.0, 4.0, 10.0));
+    private static final VoxelShape EAST_SHAPE = Shapes.or(BASE, Block.box(12.0, 4.0, 6.0, 16.0, 8.0, 10.0));
+    private static final VoxelShape NORTH_SHAPE = Shapes.or(BASE, Block.box(6.0, 4.0, 0.0, 10.0, 8.0, 4.0));
+    private static final VoxelShape SOUTH_SHAPE = Shapes.or(BASE, Block.box(6.0, 4.0, 12.0, 10.0, 8.0, 16.0));
+    private static final VoxelShape WEST_SHAPE = Shapes.or(BASE, Block.box(0.0, 4.0, 6.0, 4.0, 8.0, 10.0));
+    private static final VoxelShape DOWN_INTERACTION_SHAPE = INSIDE;
+    private static final VoxelShape EAST_INTERACTION_SHAPE = Shapes.or(INSIDE, Block.box(12.0, 8.0, 6.0, 16.0, 10.0, 10.0));
+    private static final VoxelShape NORTH_INTERACTION_SHAPE = Shapes.or(INSIDE, Block.box(6.0, 8.0, 0.0, 10.0, 10.0, 4.0));
+    private static final VoxelShape SOUTH_INTERACTION_SHAPE = Shapes.or(INSIDE, Block.box(6.0, 8.0, 12.0, 10.0, 10.0, 16.0));
+    private static final VoxelShape WEST_INTERACTION_SHAPE = Shapes.or(INSIDE, Block.box(0.0, 8.0, 6.0, 4.0, 10.0, 10.0));
 
     public BlockFlopper(Properties properties, BiFunction<BlockPos, BlockState, CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
@@ -122,7 +122,7 @@ public class BlockFlopper extends BlockWithEntity {
             case EAST:
                 return EAST_SHAPE;
             default:
-                return BASE_SHAPE;
+                return BASE;
         }
     }
 
@@ -131,17 +131,17 @@ public class BlockFlopper extends BlockWithEntity {
         // Copied from HopperBlock, to avoid conflicts with other mods messing with the hopper
         switch((Direction)state.getValue(FACING)) {
             case DOWN:
-                return DOWN_RAYTRACE_SHAPE;
+                return DOWN_INTERACTION_SHAPE;
             case NORTH:
-                return NORTH_RAYTRACE_SHAPE;
+                return NORTH_INTERACTION_SHAPE;
             case SOUTH:
-                return SOUTH_RAYTRACE_SHAPE;
+                return SOUTH_INTERACTION_SHAPE;
             case WEST:
-                return WEST_RAYTRACE_SHAPE;
+                return WEST_INTERACTION_SHAPE;
             case EAST:
-                return EAST_RAYTRACE_SHAPE;
+                return EAST_INTERACTION_SHAPE;
             default:
-                return Hopper.INSIDE;
+                return INSIDE;
         }
     }
 
@@ -192,62 +192,73 @@ public class BlockFlopper extends BlockWithEntity {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public InteractionResult use(BlockState blockState, Level world, BlockPos blockPos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        InteractionResult activatedSuper = super.use(blockState, world, blockPos, player, hand, rayTraceResult);
+    protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos pos, Player player, BlockHitResult rayTraceResult) {
+        InteractionResult activatedSuper = super.useWithoutItem(blockState, level, pos, player, rayTraceResult);
         if (activatedSuper.consumesAction()) {
             return activatedSuper;
         }
-        return BlockEntityHelpers.getCapability(world, blockPos, Capabilities.FluidHandler.BLOCK)
+
+        return BlockEntityHelpers.getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> {
-                    ItemStack itemStack = player.getItemInHand(hand);
-                    if (itemStack.isEmpty()) {
-                        if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
-                            // If the hand is empty, show the tank contents
-                            FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
-                            if (fluidStack.isEmpty()) {
-                                player.displayClientMessage(Component.literal("0 / "
-                                        + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
-                            } else {
-                                player.displayClientMessage(Component.translatable(fluidStack.getTranslationKey())
-                                        .append(Component.literal(": "
-                                                + String.format("%,d", fluidStack.getAmount()) + " / "
-                                                + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
-                            }
-                            return InteractionResult.SUCCESS;
+                    if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
+                        // If the hand is empty, show the tank contents
+                        FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
+                        if (fluidStack.isEmpty()) {
+                            player.displayClientMessage(Component.literal("0 / "
+                                    + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
+                        } else {
+                            player.displayClientMessage(fluidStack.getHoverName().plainCopy()
+                                    .append(Component.literal(": "
+                                            + String.format("%,d", fluidStack.getAmount()) + " / "
+                                            + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
                         }
-                    } else {
-                        if (!player.isCrouching()
-                                && tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
-                            // Move fluid from the item into the tank if not sneaking
-                            FluidActionResult result = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
-                            if (result.isSuccess()) {
-                                ItemStack drainedItem = result.getResult();
-                                if (!player.isCreative()) {
-                                    InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem, hand);
-                                }
-                            }
-                            return InteractionResult.SUCCESS;
-                        } else if (player.isCrouching()
-                                && FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
-                            // Move fluid from the tank into the item if sneaking
-                            FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
-                            if (result.isSuccess()) {
-                                ItemStack filledItem = result.getResult();
-                                if (!player.isCreative()) {
-                                    InventoryHelpers.tryReAddToStack(player, itemStack, filledItem, hand);
-                                }
-                            }
-                            return InteractionResult.SUCCESS;
-                        }
+                        return InteractionResult.SUCCESS;
                     }
                     return InteractionResult.PASS;
                 })
                 .orElse(InteractionResult.PASS);
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
+        ItemInteractionResult activatedSuper = super.useItemOn(itemStack, blockState, level, pos, player, hand, rayTraceResult);
+        if (activatedSuper.consumesAction()) {
+            return activatedSuper;
+        }
+
+        return BlockEntityHelpers.getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
+                .map(fluidHandler -> {
+                    if (!player.isCrouching()
+                            && tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                        // Move fluid from the item into the tank if not sneaking
+                        FluidActionResult result = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
+                        if (result.isSuccess()) {
+                            ItemStack drainedItem = result.getResult();
+                            if (!player.isCreative()) {
+                                InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem, hand);
+                            }
+                        }
+                        return ItemInteractionResult.SUCCESS;
+                    } else if (player.isCrouching()
+                            && FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                        // Move fluid from the tank into the item if sneaking
+                        FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
+                        if (result.isSuccess()) {
+                            ItemStack filledItem = result.getResult();
+                            if (!player.isCreative()) {
+                                InventoryHelpers.tryReAddToStack(player, itemStack, filledItem, hand);
+                            }
+                        }
+                        return ItemInteractionResult.SUCCESS;
+                    }
+                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                })
+                .orElse(ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION);
     }
 
     // A modified/fixed version of FluidUtil#tryEmptyContainer
@@ -255,7 +266,7 @@ public class BlockFlopper extends BlockWithEntity {
     @Nonnull
     public static FluidActionResult tryEmptyContainer(@Nonnull ItemStack container, IFluidHandler fluidDestination, int maxAmount, @Nullable Player player, boolean doDrain)
     {
-        ItemStack containerCopy = ItemHandlerHelper.copyStackWithSize(container, 1); // do not modify the input
+        ItemStack containerCopy = container.copyWithCount(1); // do not modify the input
         return FluidUtil.getFluidHandler(containerCopy)
                 .map(containerFluidHandler -> {
                     FluidStack transfer = FluidUtil.tryFluidTransfer(fluidDestination, containerFluidHandler, maxAmount, doDrain);
@@ -294,7 +305,7 @@ public class BlockFlopper extends BlockWithEntity {
         if (!event.getItemStack().isEmpty()
                 && event.getLevel().getBlockState(event.getPos()).getBlock() == this
                 && event.getItemStack().getCapability(Capabilities.FluidHandler.ITEM) != null) {
-            event.setUseBlock(Event.Result.ALLOW);
+            event.setUseBlock(TriState.TRUE);
         }
     }
 
