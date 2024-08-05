@@ -1,7 +1,5 @@
 package org.cyclops.flopper;
 
-import org.cyclops.cyclopscore.helper.MinecraftHelpers;
-
 /**
  * Class that can hold basic static things that are better not hard-coded
  * like mod details, texture paths, ID's...
@@ -14,7 +12,6 @@ public class Reference {
     // Mod info
     public static final String MOD_ID = "flopper";
     public static final String GA_TRACKING_ID = "UA-65307010-16";
-    public static final String VERSION_URL = "https://raw.githubusercontent.com/CyclopsMC/Versions/master/" + MinecraftHelpers.getMinecraftVersionMajorMinor() + "/Flopper.txt";
 
     // Paths
     public static final String TEXTURE_PATH_GUI = "textures/gui/";

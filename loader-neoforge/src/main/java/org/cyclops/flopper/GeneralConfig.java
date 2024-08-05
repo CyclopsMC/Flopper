@@ -41,7 +41,7 @@ public class GeneralConfig extends DummyConfig {
             Analytics.registerMod(getMod(), Reference.GA_TRACKING_ID);
         }
         if(versionChecker) {
-            Versions.registerMod(getMod(), Flopper._instance, Reference.VERSION_URL);
+            Versions.registerMod(getMod(), Flopper._instance, "https://raw.githubusercontent.com/CyclopsMC/Versions/master/" + getMod().getModHelpers().getMinecraftHelpers().getMinecraftVersionMajorMinor() + "/Flopper.txt");
         }
     }
 
