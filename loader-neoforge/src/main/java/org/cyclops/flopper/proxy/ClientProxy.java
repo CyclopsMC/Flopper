@@ -12,13 +12,13 @@ import org.cyclops.flopper.Flopper;
  */
 public class ClientProxy extends ClientProxyComponent {
 
-	public ClientProxy() {
-		super(new CommonProxy());
-	}
+    public ClientProxy() {
+        super(new CommonProxy());
+    }
 
-	@Override
-	public ModBase getMod() {
-		return Flopper._instance;
-	}
+    @Override
+    public ModBase getMod() {
+        return Flopper._instance;
+    }
 
 }
