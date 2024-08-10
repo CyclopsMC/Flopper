@@ -19,51 +19,33 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.wrappers.BlockWrapper;
-import org.cyclops.cyclopscore.blockentity.BlockEntityTickerDelayed;
-import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
 import org.cyclops.cyclopscore.fluid.Tank;
 import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
-import org.cyclops.cyclopscore.helper.BlockHelpers;
-import org.cyclops.cyclopscore.persist.nbt.NBTPersist;
-import org.cyclops.flopper.RegistryEntries;
-import org.cyclops.flopper.block.BlockFlopper;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 
 import java.util.Optional;
 
 /**
- * Fluid hopper tile.
  * @author rubensworks
  */
-public class BlockEntityFlopper extends CyclopsBlockEntity {
-
+public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
     private Tank tank;
 
-    @NBTPersist
-    private int transferCooldown = -1;
+    public BlockEntityFlopperNeoForge(BlockPos blockPos, BlockState blockState) {
+        super(blockPos, blockState);
 
-    public BlockEntityFlopper(BlockPos blockPos, BlockState blockState) {
-        super(RegistryEntries.BLOCK_ENTITY_FLOPPER.get(), blockPos, blockState);
         tank = new SingleUseTank(BlockFlopperConfig.capacityMb) {
             @Override
             protected void sendUpdate() {
                 super.sendUpdate();
-                BlockEntityFlopper.this.sendUpdate();
+                BlockEntityFlopperNeoForge.this.sendUpdate();
             }
         };
     }
 
     public Tank getTank() {
         return tank;
-    }
-
-    public void setTransferCooldown(int ticks) {
-        this.transferCooldown = ticks;
-    }
-
-    public int getTransferCooldown() {
-        return transferCooldown;
     }
 
     @Override
@@ -80,14 +62,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
         tag.put("tank", tagTank);
     }
 
-    protected Direction getFacing() {
-        return getLevel().getBlockState(getBlockPos()).getValue(BlockFlopper.FACING);
-    }
-
-    /**
-     * Push fluids from the inner tank to a target tank.
-     * @return If some fluid was moved.
-     */
+    @Override
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
         BlockPos targetPos = getBlockPos().relative(getFacing());
@@ -96,10 +71,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 .orElse(false);
     }
 
-    /**
-     * Push fluids from a tank above the flopper to the inner tank.
-     * @return If some fluid was moved.
-     */
+    @Override
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
         return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, Capabilities.FluidHandler.BLOCK)
@@ -107,10 +79,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 .orElse(false);
     }
 
-    /**
-     * Push fluids from the inner tank into the world at the target space.
-     * @return If some fluid was moved.
-     */
+    @Override
     protected boolean pushFluidsToWorld() {
         BlockPos targetPos = getBlockPos().relative(getFacing());
         BlockState destBlockState = level.getBlockState(targetPos);
@@ -153,10 +122,7 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
         return Optional.of(new BlockWrapper(state, world, targetPos));
     }
 
-    /**
-     * Pull fluids from the world at the target space to the inner tank.
-     * @return If some fluid was moved.
-     */
+    @Override
     protected boolean pullFluidsFromWorld() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
         BlockState destBlockState = level.getBlockState(targetPos);
@@ -180,62 +146,30 @@ public class BlockEntityFlopper extends CyclopsBlockEntity {
                 .orElse(false);
     }
 
-    private Optional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {
-        if (blockState.getBlock() instanceof LiquidBlock || blockState.getBlock() instanceof SimpleWaterloggedBlock) {
-            return Optional.of(new FluidHandlerBlock(blockState, world, targetPos));
-        }
-        return Optional.empty();
+    @Override
+    protected boolean isTankEmpty() {
+        return getTank().isEmpty();
     }
 
-    public static class Ticker extends BlockEntityTickerDelayed<BlockEntityFlopper> {
-        @Override
-        protected void update(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
-            super.update(level, pos, blockState, blockEntity);
+    @Override
+    protected boolean isTankFull() {
+        return getTank().isFull();
+    }
 
-            if (level != null && !level.isClientSide) {
-                blockEntity.setTransferCooldown(blockEntity.getTransferCooldown() - 1);
-                if (!this.isOnTransferCooldown(blockEntity)) {
-                    blockEntity.setTransferCooldown(0);
-                    this.updateHopper(level, pos, blockState, blockEntity);
-                }
-            }
+    @Override
+    public int getFluidAmount() {
+        return getTank().getFluidAmount();
+    }
+
+    @Override
+    public int getFluidCapacity() {
+        return getTank().getCapacity();
+    }
+
+    private Optional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {
+        if (blockState.getBlock() instanceof LiquidBlock || blockState.getBlock() instanceof SimpleWaterloggedBlock) {
+            return Optional.of(new FluidHandlerBlockNeoForge(blockState, world, targetPos));
         }
-
-        private boolean isOnTransferCooldown(BlockEntityFlopper blockEntity) {
-            return blockEntity.getTransferCooldown() > 0;
-        }
-
-        protected boolean updateHopper(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
-            if (level != null && !level.isClientSide) {
-                if (!this.isOnTransferCooldown(blockEntity) && BlockHelpers.getSafeBlockStateProperty(blockState, BlockFlopper.ENABLED, false)) {
-                    boolean worked = false;
-                    boolean workedWorld = false;
-
-                    // Push fluids
-                    if (!blockEntity.getTank().isEmpty()) {
-                        worked = (BlockFlopperConfig.pushFluidRate > 0 && blockEntity.pushFluidsToTank())
-                                || (workedWorld = (BlockFlopperConfig.pushFluidsWorld && blockEntity.pushFluidsToWorld()));
-                    }
-
-                    // Pull fluids
-                    if (!blockEntity.getTank().isFull()) {
-                        worked = (BlockFlopperConfig.pullFluidRate > 0 && blockEntity.pullFluidsFromTank())
-                                || (workedWorld = (BlockFlopperConfig.pullFluidsWorld && blockEntity.pullFluidsFromWorld()) || workedWorld)
-                                || worked;
-                    }
-
-                    if (worked) {
-                        blockEntity.setTransferCooldown(workedWorld
-                                ? BlockFlopperConfig.workWorldCooldown : BlockFlopperConfig.workCooldown);
-                        blockEntity.setChanged();
-                        return true;
-                    }
-                }
-
-                return false;
-            } else {
-                return false;
-            }
-        }
+        return Optional.empty();
     }
 }

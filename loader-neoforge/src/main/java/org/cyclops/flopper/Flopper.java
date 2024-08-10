@@ -9,8 +9,8 @@ import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.init.ModBaseVersionable;
 import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
-import org.cyclops.flopper.block.BlockFlopperConfig;
-import org.cyclops.flopper.blockentity.BlockEntityFlopperConfig;
+import org.cyclops.flopper.block.BlockFlopperConfigNeoForge;
+import org.cyclops.flopper.blockentity.BlockEntityFlopperConfigNeoForge;
 import org.cyclops.flopper.proxy.ClientProxy;
 import org.cyclops.flopper.proxy.CommonProxy;
 
@@ -58,8 +58,8 @@ public class Flopper extends ModBaseVersionable<Flopper> {
 
         configHandler.addConfigurable(new GeneralConfig());
 
-        configHandler.addConfigurable(new BlockFlopperConfig());
-        configHandler.addConfigurable(new BlockEntityFlopperConfig());
+        configHandler.addConfigurable(new BlockFlopperConfigNeoForge());
+        configHandler.addConfigurable(new BlockEntityFlopperConfigNeoForge());
     }
 
     /**

@@ -20,13 +20,13 @@ import javax.annotation.Nonnull;
  * it can not be filled.
  * @author rubensworks
  */
-public class FluidHandlerBlock implements IFluidHandler {
+public class FluidHandlerBlockNeoForge implements IFluidHandler {
 
     private final BlockState state;
     private final Level world;
     private final BlockPos blockPos;
 
-    public FluidHandlerBlock(BlockState state, Level world, BlockPos blockPos) {
+    public FluidHandlerBlockNeoForge(BlockState state, Level world, BlockPos blockPos) {
         this.state = state;
         this.world = world;
         this.blockPos = blockPos;

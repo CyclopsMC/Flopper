@@ -8,12 +8,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Triple;
-import org.cyclops.cyclopscore.helper.Helpers;
-import org.cyclops.cyclopscore.helper.RenderHelpers;
-import org.cyclops.flopper.blockentity.BlockEntityFlopper;
+import org.cyclops.cyclopscore.helper.IRenderHelpersForge;
+import org.cyclops.flopper.FlopperForge;
+import org.cyclops.flopper.blockentity.BlockEntityFlopperForge;
 import org.joml.Matrix4f;
 
 /**
@@ -22,25 +22,26 @@ import org.joml.Matrix4f;
  * @author rubensworks
  *
  */
-public class RenderBlockEntityFlopper implements BlockEntityRenderer<BlockEntityFlopper> {
+public class RenderBlockEntityFlopperForge implements BlockEntityRenderer<BlockEntityFlopperForge> {
 
-    public RenderBlockEntityFlopper(BlockEntityRendererProvider.Context context) {
+    public RenderBlockEntityFlopperForge(BlockEntityRendererProvider.Context context) {
 
     }
 
     @Override
-    public void render(BlockEntityFlopper tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void render(BlockEntityFlopperForge tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         if(tile != null) {
             FluidStack fluid = tile.getTank().getFluid();
-            RenderHelpers.renderFluidContext(fluid, matrixStack, () -> {
+            IRenderHelpersForge renderHelpers = FlopperForge._instance.getModHelpers().getRenderHelpers();
+            renderHelpers.renderFluidContext(fluid, matrixStack, () -> {
                 float height = (fluid.getAmount() * 0.3125F) / tile.getTank().getCapacity() + 0.6875F;
                 int brightness = Math.max(combinedLight, fluid.getFluid().getFluidType().getLightLevel(fluid));
                 int l2 = brightness >> 0x10 & 0xFFFF;
                 int i3 = brightness & 0xFFFF;
 
-                TextureAtlasSprite icon = RenderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
+                TextureAtlasSprite icon = renderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
                 IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid.getFluid());
-                Triple<Float, Float, Float> color = Helpers.intToRGB(renderProperties.getTintColor(fluid.getFluid().defaultFluidState(), tile.getLevel(), tile.getBlockPos()));
+                Triple<Float, Float, Float> color = FlopperForge._instance.getModHelpers().getBaseHelpers().intToRGB(renderProperties.getTintColor(fluid.getFluid().defaultFluidState(), tile.getLevel(), tile.getBlockPos()));
 
                 VertexConsumer vb = buffer.getBuffer(RenderType.text(icon.atlasLocation()));
                 Matrix4f matrix = matrixStack.last().pose();
