@@ -1,17 +1,17 @@
 package org.cyclops.flopper.blockentity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import org.cyclops.cyclopscore.helper.FluidHelpers;
+import org.cyclops.flopper.FlopperNeoForge;
 
 import javax.annotation.Nonnull;
 
@@ -42,9 +42,9 @@ public class FluidHandlerBlockNeoForge implements IFluidHandler {
     public FluidStack getFluidInTank(int tank) {
         Block block = this.state.getBlock();
         if (block instanceof LiquidBlock && this.state.getValue(LiquidBlock.LEVEL) == 0) {
-            return new FluidStack(((LiquidBlock) block).fluid, FluidHelpers.BUCKET_VOLUME);
+            return new FluidStack(((LiquidBlock) block).fluid, FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume());
         } else if (this.state.hasProperty(BlockStateProperties.WATERLOGGED) && this.state.getValue(BlockStateProperties.WATERLOGGED)) {
-            return new FluidStack(Fluids.WATER, FluidHelpers.BUCKET_VOLUME);
+            return new FluidStack(Fluids.WATER, FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume());
         } else {
             return FluidStack.EMPTY;
         }
@@ -52,7 +52,7 @@ public class FluidHandlerBlockNeoForge implements IFluidHandler {
 
     @Override
     public int getTankCapacity(int tank) {
-        return FluidHelpers.BUCKET_VOLUME;
+        return FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume();
     }
 
     @Override
@@ -86,19 +86,19 @@ public class FluidHandlerBlockNeoForge implements IFluidHandler {
         Block block = this.state.getBlock();
         if (block instanceof LiquidBlock
                 && this.state.getValue(LiquidBlock.LEVEL) == 0
-                && maxDrain >= FluidHelpers.BUCKET_VOLUME) {
+                && maxDrain >= FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume()) {
             if (action.execute()) {
                 this.world.setBlock(this.blockPos, Blocks.AIR.defaultBlockState(), 11);
             }
-            return new FluidStack(((LiquidBlock) block).fluid, FluidHelpers.BUCKET_VOLUME);
+            return new FluidStack(((LiquidBlock) block).fluid, FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume());
         } else if (this.state.hasProperty(BlockStateProperties.WATERLOGGED)
                 && this.state.getValue(BlockStateProperties.WATERLOGGED)
                 && block instanceof SimpleWaterloggedBlock
-                && maxDrain >= FluidHelpers.BUCKET_VOLUME) {
+                && maxDrain >= FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume()) {
             if (action.execute()) {
                 ((SimpleWaterloggedBlock) block).pickupBlock(null, world, blockPos, state);
             }
-            return new FluidStack(Fluids.WATER, FluidHelpers.BUCKET_VOLUME);
+            return new FluidStack(Fluids.WATER, FlopperNeoForge._instance.getModHelpers().getFluidHelpers().getBucketVolume());
         }
         return FluidStack.EMPTY;
     }

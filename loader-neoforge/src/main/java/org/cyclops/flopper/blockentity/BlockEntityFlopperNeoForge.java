@@ -21,7 +21,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.wrappers.BlockWrapper;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
 import org.cyclops.cyclopscore.fluid.Tank;
-import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
+import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 
 import java.util.Optional;
@@ -66,7 +66,7 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
         BlockPos targetPos = getBlockPos().relative(getFacing());
-        return BlockEntityHelpers.getCapability(level, targetPos, targetSide, Capabilities.FluidHandler.BLOCK)
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, targetSide, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(fluidHandler, tank, BlockFlopperConfig.pushFluidRate, true).isEmpty())
                 .orElse(false);
     }
@@ -74,7 +74,7 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
     @Override
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
-        return BlockEntityHelpers.getCapability(level, targetPos, Direction.DOWN, Capabilities.FluidHandler.BLOCK)
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, Direction.DOWN, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
                 .orElse(false);
     }

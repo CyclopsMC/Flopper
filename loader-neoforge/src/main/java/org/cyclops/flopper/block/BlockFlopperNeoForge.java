@@ -26,9 +26,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntityCommon;
-import org.cyclops.cyclopscore.helper.BlockEntityHelpers;
-import org.cyclops.cyclopscore.helper.FluidHelpers;
-import org.cyclops.cyclopscore.helper.InventoryHelpers;
+import org.cyclops.cyclopscore.helper.IFluidHelpersNeoForge;
+import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
 
 import javax.annotation.Nonnull;
@@ -58,7 +57,7 @@ public class BlockFlopperNeoForge extends BlockFlopper {
             return activatedSuper;
         }
 
-        return BlockEntityHelpers.getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> {
                     if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
                         // If the hand is empty, show the tank contents
@@ -86,27 +85,28 @@ public class BlockFlopperNeoForge extends BlockFlopper {
             return activatedSuper;
         }
 
-        return BlockEntityHelpers.getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
+        IFluidHelpersNeoForge fh = FlopperNeoForge._instance.getModHelpers().getFluidHelpers();
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
                 .map(fluidHandler -> {
                     if (!player.isCrouching()
-                            && tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                            && tryEmptyContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, false).isSuccess()) {
                         // Move fluid from the item into the tank if not sneaking
-                        FluidActionResult result = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
+                        FluidActionResult result = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, true);
                         if (result.isSuccess()) {
                             ItemStack drainedItem = result.getResult();
                             if (!player.isCreative()) {
-                                InventoryHelpers.tryReAddToStack(player, itemStack, drainedItem, hand);
+                                FlopperNeoForge._instance.getModHelpers().getInventoryHelpers().tryReAddToStack(player, itemStack, drainedItem, hand);
                             }
                         }
                         return ItemInteractionResult.SUCCESS;
                     } else if (player.isCrouching()
-                            && FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, false).isSuccess()) {
+                            && FluidUtil.tryFillContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, false).isSuccess()) {
                         // Move fluid from the tank into the item if sneaking
-                        FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, FluidHelpers.BUCKET_VOLUME, player, true);
+                        FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, true);
                         if (result.isSuccess()) {
                             ItemStack filledItem = result.getResult();
                             if (!player.isCreative()) {
-                                InventoryHelpers.tryReAddToStack(player, itemStack, filledItem, hand);
+                                FlopperNeoForge._instance.getModHelpers().getInventoryHelpers().tryReAddToStack(player, itemStack, filledItem, hand);
                             }
                         }
                         return ItemInteractionResult.SUCCESS;
