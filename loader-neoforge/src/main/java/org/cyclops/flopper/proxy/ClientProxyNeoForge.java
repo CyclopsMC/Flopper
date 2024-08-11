@@ -2,7 +2,7 @@ package org.cyclops.flopper.proxy;
 
 import org.cyclops.cyclopscore.init.ModBase;
 import org.cyclops.cyclopscore.proxy.ClientProxyComponent;
-import org.cyclops.flopper.Flopper;
+import org.cyclops.flopper.FlopperNeoForge;
 
 /**
  * Proxy for the client side.
@@ -10,15 +10,15 @@ import org.cyclops.flopper.Flopper;
  * @author rubensworks
  *
  */
-public class ClientProxy extends ClientProxyComponent {
+public class ClientProxyNeoForge extends ClientProxyComponent {
 
-    public ClientProxy() {
-        super(new CommonProxy());
+    public ClientProxyNeoForge() {
+        super(new CommonProxyNeoForge());
     }
 
     @Override
     public ModBase getMod() {
-        return Flopper._instance;
+        return FlopperNeoForge._instance;
     }
 
 }

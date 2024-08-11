@@ -29,7 +29,7 @@ public class GeneralConfig extends DummyConfig {
     public static boolean versionChecker = true;
 
     public GeneralConfig() {
-        super(Flopper._instance, "general");
+        super(FlopperNeoForge._instance, "general");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class GeneralConfig extends DummyConfig {
             Analytics.registerMod(getMod(), Reference.GA_TRACKING_ID);
         }
         if(versionChecker) {
-            Versions.registerMod(getMod(), Flopper._instance, "https://raw.githubusercontent.com/CyclopsMC/Versions/master/" + getMod().getModHelpers().getMinecraftHelpers().getMinecraftVersionMajorMinor() + "/Flopper.txt");
+            Versions.registerMod(getMod(), FlopperNeoForge._instance, "https://raw.githubusercontent.com/CyclopsMC/Versions/master/" + getMod().getModHelpers().getMinecraftHelpers().getMinecraftVersionMajorMinor() + "/Flopper.txt");
         }
     }
 

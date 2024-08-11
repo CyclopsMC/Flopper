@@ -12,7 +12,7 @@ import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtension
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cyclops.cyclopscore.helper.IRenderHelpersNeoForge;
-import org.cyclops.flopper.Flopper;
+import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
 import org.joml.Matrix4f;
 
@@ -32,7 +32,7 @@ public class RenderBlockEntityFlopperNeoForge implements BlockEntityRenderer<Blo
     public void render(BlockEntityFlopperNeoForge tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         if(tile != null) {
             FluidStack fluid = tile.getTank().getFluid();
-            IRenderHelpersNeoForge renderHelpers = Flopper._instance.getModHelpers().getRenderHelpers();
+            IRenderHelpersNeoForge renderHelpers = FlopperNeoForge._instance.getModHelpers().getRenderHelpers();
             renderHelpers.renderFluidContext(fluid, matrixStack, () -> {
                 float height = (fluid.getAmount() * 0.3125F) / tile.getTank().getCapacity() + 0.6875F;
                 int brightness = Math.max(combinedLight, fluid.getFluid().getFluidType().getLightLevel(fluid));
@@ -41,7 +41,7 @@ public class RenderBlockEntityFlopperNeoForge implements BlockEntityRenderer<Blo
 
                 TextureAtlasSprite icon = renderHelpers.getFluidIcon(tile.getTank().getFluid(), Direction.UP);
                 IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid.getFluid());
-                Triple<Float, Float, Float> color = Flopper._instance.getModHelpers().getBaseHelpers().intToRGB(renderProperties.getTintColor(fluid.getFluid().defaultFluidState(), tile.getLevel(), tile.getBlockPos()));
+                Triple<Float, Float, Float> color = FlopperNeoForge._instance.getModHelpers().getBaseHelpers().intToRGB(renderProperties.getTintColor(fluid.getFluid().defaultFluidState(), tile.getLevel(), tile.getBlockPos()));
 
                 VertexConsumer vb = buffer.getBuffer(RenderType.text(icon.atlasLocation()));
                 Matrix4f matrix = matrixStack.last().pose();

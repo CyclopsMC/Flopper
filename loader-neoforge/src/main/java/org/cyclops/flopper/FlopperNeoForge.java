@@ -11,8 +11,8 @@ import org.cyclops.cyclopscore.proxy.IClientProxy;
 import org.cyclops.cyclopscore.proxy.ICommonProxy;
 import org.cyclops.flopper.block.BlockFlopperConfigNeoForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperConfigNeoForge;
-import org.cyclops.flopper.proxy.ClientProxy;
-import org.cyclops.flopper.proxy.CommonProxy;
+import org.cyclops.flopper.proxy.ClientProxyNeoForge;
+import org.cyclops.flopper.proxy.CommonProxyNeoForge;
 
 /**
  * The main mod class of this mod.
@@ -20,25 +20,25 @@ import org.cyclops.flopper.proxy.CommonProxy;
  *
  */
 @Mod(Reference.MOD_ID)
-public class Flopper extends ModBaseVersionable<Flopper> {
+public class FlopperNeoForge extends ModBaseVersionable<FlopperNeoForge> {
 
     /**
      * The unique instance of this mod.
      */
-    public static Flopper _instance;
+    public static FlopperNeoForge _instance;
 
-    public Flopper(IEventBus modEventBus) {
+    public FlopperNeoForge(IEventBus modEventBus) {
         super(Reference.MOD_ID, (instance) -> _instance = instance, modEventBus);
     }
 
     @Override
     protected IClientProxy constructClientProxy() {
-        return new ClientProxy();
+        return new ClientProxyNeoForge();
     }
 
     @Override
     protected ICommonProxy constructCommonProxy() {
-        return new CommonProxy();
+        return new CommonProxyNeoForge();
     }
 
     @Override
@@ -76,7 +76,7 @@ public class Flopper extends ModBaseVersionable<Flopper> {
      * @param message The message to show.
      */
     public static void clog(Level level, String message) {
-        Flopper._instance.getLoggerHelper().log(level, message);
+        FlopperNeoForge._instance.getLoggerHelper().log(level, message);
     }
 
 }
