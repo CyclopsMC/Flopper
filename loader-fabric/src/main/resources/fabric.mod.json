@@ -19,12 +19,16 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.cyclops.flopper.FlopperMainFabric"
+      "org.cyclops.flopper.FlopperFabric"
     ],
     "client": [
       "org.cyclops.flopper.FlopperClientFabric"
     ]
   },
+  "accessWidener" : "flopper.accesswidener",
+  "mixins": [
+    "mixins.flopper.json"
+  ],
 
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",

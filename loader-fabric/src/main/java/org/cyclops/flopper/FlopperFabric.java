@@ -3,13 +3,12 @@ package org.cyclops.flopper;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import org.cyclops.cyclopscore.Reference;
 import org.cyclops.cyclopscore.config.ConfigHandler;
 import org.cyclops.cyclopscore.init.ModBaseFabric;
 import org.cyclops.cyclopscore.proxy.IClientProxyCommon;
 import org.cyclops.cyclopscore.proxy.ICommonProxyCommon;
-import org.cyclops.flopper.block.BlockFlopperConfig;
-import org.cyclops.flopper.blockentity.BlockEntityFlopperConfig;
+import org.cyclops.flopper.block.BlockFlopperConfigFabric;
+import org.cyclops.flopper.blockentity.BlockEntityFlopperConfigFabric;
 import org.cyclops.flopper.proxy.ClientProxyFabric;
 import org.cyclops.flopper.proxy.CommonProxyFabric;
 
@@ -17,14 +16,14 @@ import org.cyclops.flopper.proxy.CommonProxyFabric;
  * The main mod class of Flopper.
  * @author rubensworks
  */
-public class FlopperMainFabric extends ModBaseFabric<FlopperMainFabric> implements ModInitializer {
+public class FlopperFabric extends ModBaseFabric<FlopperFabric> implements ModInitializer {
 
     /**
      * The unique instance of this mod.
      */
-    public static FlopperMainFabric _instance;
+    public static FlopperFabric _instance;
 
-    public FlopperMainFabric() {
+    public FlopperFabric() {
         super(Reference.MOD_ID, (instance) -> _instance = instance);
     }
 
@@ -53,7 +52,7 @@ public class FlopperMainFabric extends ModBaseFabric<FlopperMainFabric> implemen
     protected void onConfigsRegister(ConfigHandler configHandler) {
         super.onConfigsRegister(configHandler);
 
-        configHandler.addConfigurable(new BlockFlopperConfig<>(this, null));
-        configHandler.addConfigurable(new BlockEntityFlopperConfig<>(this, null));
+        configHandler.addConfigurable(new BlockFlopperConfigFabric());
+        configHandler.addConfigurable(new BlockEntityFlopperConfigFabric());
     }
 }

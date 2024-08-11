@@ -3,7 +3,7 @@ package org.cyclops.flopper.proxy;
 import org.cyclops.cyclopscore.init.ModBaseFabric;
 import org.cyclops.cyclopscore.proxy.ClientProxyComponentFabric;
 import org.cyclops.cyclopscore.proxy.CommonProxyFabric;
-import org.cyclops.flopper.FlopperMainFabric;
+import org.cyclops.flopper.FlopperFabric;
 
 /**
  * Proxy for the client side.
@@ -19,7 +19,7 @@ public class ClientProxyFabric extends ClientProxyComponentFabric {
 
     @Override
     public ModBaseFabric<?> getMod() {
-        return FlopperMainFabric._instance;
+        return FlopperFabric._instance;
     }
 
 }
