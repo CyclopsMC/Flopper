@@ -2,6 +2,13 @@ plugins {
     id 'multiloader-loader-fabric'
 }
 
+repositories {
+    maven {
+        name "Forge Config API Port"
+        url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    }
+}
+
 dependencies {
     // Add something like 'cyclopscore_version_local=0.1.0-DEV' to your secrets.properties if you want to use a custom local CyclopsCore version.
     if (secrets.cyclopscore_version_local) {
@@ -9,4 +16,6 @@ dependencies {
     } else {
         implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-fabric:${project.cyclopscore_version}:deobf"
     }
+
+    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_fabric_version}"
 }

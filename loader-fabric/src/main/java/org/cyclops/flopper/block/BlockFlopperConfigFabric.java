@@ -18,13 +18,13 @@ import org.cyclops.flopper.blockentity.BlockEntityFlopperFabric;
 public class BlockFlopperConfigFabric extends BlockFlopperConfig<ModBaseFabric<?>> {
 
     @ConfigurablePropertyCommon(category = "machine", comment = "The maximum capacity in mB.", isCommandable = true, requiresMcRestart = true, configLocation = ModConfigLocation.SERVER)
-    public static long capacityDroplets = 5 * FluidConstants.BUCKET;
+    public static int capacityDroplets = 5 * (int) FluidConstants.BUCKET;
 
     @ConfigurablePropertyCommon(category = "machine", comment = "The rate at which fluids can be pulled from other tanks.", isCommandable = true, configLocation = ModConfigLocation.SERVER)
-    public static long pullFluidRateDroplets = FluidConstants.BUCKET / 10;
+    public static int pullFluidRateDroplets = (int) FluidConstants.BUCKET / 10;
 
     @ConfigurablePropertyCommon(category = "machine", comment = "The rate at which fluids can be pushed to other tanks.", isCommandable = true, configLocation = ModConfigLocation.SERVER)
-    public static long pushFluidRateDroplets = FluidConstants.BUCKET / 10;
+    public static int pushFluidRateDroplets = (int) FluidConstants.BUCKET / 10;
 
     public BlockFlopperConfigFabric() {
         super(
