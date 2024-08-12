@@ -20,9 +20,6 @@
   "entrypoints": {
     "main": [
       "org.cyclops.flopper.FlopperFabric"
-    ],
-    "client": [
-      "org.cyclops.flopper.FlopperClientFabric"
     ]
   },
   "accessWidener" : "flopper.accesswidener",
