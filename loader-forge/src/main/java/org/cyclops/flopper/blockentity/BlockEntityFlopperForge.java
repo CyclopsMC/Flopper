@@ -43,6 +43,7 @@ public class BlockEntityFlopperForge extends BlockEntityFlopper {
             protected void sendUpdate() {
                 super.sendUpdate();
                 BlockEntityFlopperForge.this.sendUpdate();
+                BlockEntityFlopperForge.this.onDirty();
             }
         };
         fluidCapability = LazyOptional.of(() -> tank);

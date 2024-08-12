@@ -48,6 +48,7 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
             protected void onFinalCommit() {
                 super.onFinalCommit();
                 BlockEntityFlopperFabric.this.sendUpdate();
+                BlockEntityFlopperFabric.this.onDirty();
             }
         };
     }

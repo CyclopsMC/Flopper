@@ -40,6 +40,7 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
             protected void sendUpdate() {
                 super.sendUpdate();
                 BlockEntityFlopperNeoForge.this.sendUpdate();
+                BlockEntityFlopperNeoForge.this.onDirty();
             }
         };
     }
