@@ -54,6 +54,8 @@ public class FlopperForge extends ModBaseForge<FlopperForge> {
     protected void onConfigsRegister(ConfigHandler configHandler) {
         super.onConfigsRegister(configHandler);
 
+        configHandler.addConfigurable(new GeneralConfig(this));
+
         configHandler.addConfigurable(new BlockFlopperConfigForge());
         configHandler.addConfigurable(new BlockEntityFlopperConfigForge());
     }

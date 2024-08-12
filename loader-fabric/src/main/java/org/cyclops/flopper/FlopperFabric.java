@@ -52,6 +52,8 @@ public class FlopperFabric extends ModBaseFabric<FlopperFabric> implements ModIn
     protected void onConfigsRegister(ConfigHandler configHandler) {
         super.onConfigsRegister(configHandler);
 
+        configHandler.addConfigurable(new GeneralConfig(this));
+
         configHandler.addConfigurable(new BlockFlopperConfigFabric());
         configHandler.addConfigurable(new BlockEntityFlopperConfigFabric());
     }
