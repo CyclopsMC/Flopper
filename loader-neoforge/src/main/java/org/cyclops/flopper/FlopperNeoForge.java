@@ -56,7 +56,7 @@ public class FlopperNeoForge extends ModBaseVersionable<FlopperNeoForge> {
     protected void onConfigsRegister(ConfigHandler configHandler) {
         super.onConfigsRegister(configHandler);
 
-        configHandler.addConfigurable(new GeneralConfigNeoForge());
+        configHandler.addConfigurable(new GeneralConfig(this));
 
         configHandler.addConfigurable(new BlockFlopperConfigNeoForge());
         configHandler.addConfigurable(new BlockEntityFlopperConfigNeoForge());
