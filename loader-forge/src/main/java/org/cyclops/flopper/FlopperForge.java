@@ -3,7 +3,7 @@ package org.cyclops.flopper;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
-import org.cyclops.cyclopscore.config.ConfigHandler;
+import org.cyclops.cyclopscore.config.ConfigHandlerCommon;
 import org.cyclops.cyclopscore.init.ModBaseForge;
 import org.cyclops.cyclopscore.proxy.CommonProxyForge;
 import org.cyclops.cyclopscore.proxy.IClientProxyCommon;
@@ -51,7 +51,7 @@ public class FlopperForge extends ModBaseForge<FlopperForge> {
     }
 
     @Override
-    protected void onConfigsRegister(ConfigHandler configHandler) {
+    protected void onConfigsRegister(ConfigHandlerCommon configHandler) {
         super.onConfigsRegister(configHandler);
 
         configHandler.addConfigurable(new GeneralConfig(this));
