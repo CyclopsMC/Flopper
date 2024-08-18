@@ -28,7 +28,7 @@
   ],
 
   "depends": {
-    "cyclopscore": ">=${cyclopscore_version}",
+    "cyclopscore": ">=${cyclopscore_version_semver}",
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": ">=${fabric_version}",
     "java": ">=${java_version}"

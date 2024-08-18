@@ -14,7 +14,7 @@ description="${description}"
 [[dependencies.${mod_id}]]
     modId="cyclopscore"
     type="required"
-    versionRange="[${cyclopscore_version},)"
+    versionRange="[${cyclopscore_version_semver},)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.${mod_id}]]
