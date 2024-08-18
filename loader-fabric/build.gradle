@@ -20,7 +20,7 @@ dependencies {
         implementation "org.cyclops.cyclopscore:cyclopscore-${project.minecraft_version}-fabric:${project.cyclopscore_version}:deobf"
     }
 
-    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forgeconfigapiport_fabric_version}"
+    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${fabric_forgeconfigapiport_version}"
 }
 
 task publishCurseForge(type: TaskPublishCurseForge) {
