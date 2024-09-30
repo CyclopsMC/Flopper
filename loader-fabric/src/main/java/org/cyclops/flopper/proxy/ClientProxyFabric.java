@@ -2,7 +2,6 @@ package org.cyclops.flopper.proxy;
 
 import org.cyclops.cyclopscore.init.ModBaseFabric;
 import org.cyclops.cyclopscore.proxy.ClientProxyComponentFabric;
-import org.cyclops.cyclopscore.proxy.CommonProxyFabric;
 import org.cyclops.flopper.FlopperFabric;
 
 /**
