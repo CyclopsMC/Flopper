@@ -20,6 +20,9 @@
   "entrypoints": {
     "main": [
       "org.cyclops.flopper.FlopperFabric"
+    ],
+    "fabric-gametest": [
+      "org.cyclops.flopper.gametest.GameTestsCommon"
     ]
   },
   "accessWidener" : "flopper.accesswidener",

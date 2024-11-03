@@ -23,6 +23,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.wrappers.BlockWrapper;
 import org.cyclops.cyclopscore.fluid.SingleUseTankForge;
 import org.cyclops.cyclopscore.fluid.TankForge;
+import org.cyclops.cyclopscore.helper.IModHelpersForge;
 import org.cyclops.flopper.FlopperForge;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 
@@ -169,6 +170,11 @@ public class BlockEntityFlopperForge extends BlockEntityFlopper {
     @Override
     public int getFluidCapacity() {
         return getTank().getCapacity();
+    }
+
+    @Override
+    public boolean hasBucket() {
+        return getTank().getFluidAmount() == IModHelpersForge.get().getFluidHelpers().getBucketVolume();
     }
 
     private Optional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {

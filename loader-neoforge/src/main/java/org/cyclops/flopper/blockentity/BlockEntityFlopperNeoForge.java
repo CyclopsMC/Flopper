@@ -21,6 +21,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.wrappers.BlockWrapper;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
 import org.cyclops.cyclopscore.fluid.Tank;
+import org.cyclops.cyclopscore.helper.IModHelpersNeoForge;
 import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 
@@ -165,6 +166,11 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
     @Override
     public int getFluidCapacity() {
         return getTank().getCapacity();
+    }
+
+    @Override
+    public boolean hasBucket() {
+        return getTank().getFluidAmount() == IModHelpersNeoForge.get().getFluidHelpers().getBucketVolume();
     }
 
     private Optional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {

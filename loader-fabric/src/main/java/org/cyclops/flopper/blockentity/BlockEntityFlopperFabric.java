@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
+import org.cyclops.cyclopscore.helper.IModHelpersFabric;
 import org.cyclops.flopper.FlopperFabric;
 import org.cyclops.flopper.block.BlockFlopperConfig;
 import org.cyclops.flopper.block.BlockFlopperConfigFabric;
@@ -170,6 +171,11 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
     @Override
     public int getFluidCapacity() {
         return (int) getTank().getCapacity();
+    }
+
+    @Override
+    public boolean hasBucket() {
+        return getTank().getAmount() == IModHelpersFabric.get().getFluidHelpers().getBucketVolume();
     }
 
     private Optional<Storage<FluidVariant>> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {

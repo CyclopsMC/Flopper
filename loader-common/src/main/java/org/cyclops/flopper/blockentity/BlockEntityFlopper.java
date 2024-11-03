@@ -69,6 +69,8 @@ public abstract class BlockEntityFlopper extends CyclopsBlockEntityCommon {
 
     public abstract int getFluidCapacity();
 
+    public abstract boolean hasBucket();
+
     public static class Ticker extends BlockEntityTickerDelayed<BlockEntityFlopper> {
         @Override
         protected void update(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
