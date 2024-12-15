@@ -1,1 +1,7 @@
-{}
+{
+  "_comment": "Blokken",
+  "itemGroup.flopper": "Flopper",
+  "general.flopper.description": "Een trechter voor het overdragen van vloeistoffen",
+  "block.flopper.flopper": "Vrechter",
+  "block.flopper.flopper.info": "Een trechter voor het overdragen van vloeistoffen"
+}
