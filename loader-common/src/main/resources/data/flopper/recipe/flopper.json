@@ -6,14 +6,11 @@
     " I "
   ],
   "key": {
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "B": {
-      "item": "minecraft:bucket"
-    }
+    "I": "#c:ingots/iron",
+    "B": "minecraft:bucket"
   },
   "result": {
+    "count": 1,
     "id": "flopper:flopper"
   }
 }

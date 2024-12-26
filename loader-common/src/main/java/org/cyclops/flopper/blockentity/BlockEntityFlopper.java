@@ -5,7 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.cyclops.cyclopscore.blockentity.BlockEntityTickerDelayed;
-import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntityCommon;
+import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.IModHelpers;
 import org.cyclops.cyclopscore.persist.nbt.NBTPersist;
 import org.cyclops.flopper.RegistryEntries;
@@ -16,7 +16,7 @@ import org.cyclops.flopper.block.BlockFlopperConfig;
  * Fluid hopper tile.
  * @author rubensworks
  */
-public abstract class BlockEntityFlopper extends CyclopsBlockEntityCommon {
+public abstract class BlockEntityFlopper extends CyclopsBlockEntity {
 
     @NBTPersist
     private int transferCooldown = -1;

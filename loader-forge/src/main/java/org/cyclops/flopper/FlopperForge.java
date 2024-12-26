@@ -3,6 +3,7 @@ package org.cyclops.flopper;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.cyclops.cyclopscore.config.ConfigHandlerCommon;
 import org.cyclops.cyclopscore.init.ModBaseForge;
 import org.cyclops.cyclopscore.proxy.CommonProxyForge;
@@ -25,8 +26,8 @@ public class FlopperForge extends ModBaseForge<FlopperForge> {
      */
     public static FlopperForge _instance;
 
-    public FlopperForge() {
-        super(Reference.MOD_ID, (instance) -> _instance = instance);
+    public FlopperForge(FMLJavaModLoadingContext context) {
+        super(Reference.MOD_ID, (instance) -> _instance = instance, context);
     }
 
     @Override

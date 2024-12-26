@@ -16,7 +16,7 @@ public class BlockEntityFlopperConfigForge extends BlockEntityFlopperConfig<Bloc
         super(
                 FlopperForge._instance,
                 (eConfig) -> new BlockEntityType<>(BlockEntityFlopperForge::new,
-                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.value()), null)
+                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.value()))
         );
     }
 

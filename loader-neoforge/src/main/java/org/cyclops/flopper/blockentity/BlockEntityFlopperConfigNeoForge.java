@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import org.cyclops.cyclopscore.init.ModBase;
+import org.cyclops.cyclopscore.init.ModBaseNeoForge;
 import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.block.BlockFlopperConfig;
@@ -13,12 +13,12 @@ import org.cyclops.flopper.client.render.blockentity.RenderBlockEntityFlopperNeo
 /**
  * @author rubensworks
  */
-public class BlockEntityFlopperConfigNeoForge extends BlockEntityFlopperConfig<BlockEntityFlopperNeoForge, ModBase<?>> {
+public class BlockEntityFlopperConfigNeoForge extends BlockEntityFlopperConfig<BlockEntityFlopperNeoForge, ModBaseNeoForge<?>> {
     public BlockEntityFlopperConfigNeoForge() {
         super(
                 FlopperNeoForge._instance,
                 (eConfig) -> new BlockEntityType<>(BlockEntityFlopperNeoForge::new,
-                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.value()), null)
+                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.value()))
         );
         FlopperNeoForge._instance.getModEventBus().addListener(this::registerCapabilities);
     }

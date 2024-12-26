@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -25,7 +24,7 @@ import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntityCommon;
+import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.IFluidHelpersNeoForge;
 import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
@@ -40,7 +39,7 @@ import java.util.function.BiFunction;
 public class BlockFlopperNeoForge extends BlockFlopper {
     public static final MapCodec<BlockFlopper> CODEC = BlockBehaviour.simpleCodec(properties -> new BlockFlopperNeoForge(properties, BlockEntityFlopperNeoForge::new));
 
-    public BlockFlopperNeoForge(Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntityCommon> blockEntitySupplier) {
+    public BlockFlopperNeoForge(Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
         NeoForge.EVENT_BUS.register(this);
     }
@@ -79,8 +78,8 @@ public class BlockFlopperNeoForge extends BlockFlopper {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        ItemInteractionResult activatedSuper = super.useItemOn(itemStack, blockState, level, pos, player, hand, rayTraceResult);
+    protected InteractionResult useItemOn(ItemStack itemStack, BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
+        InteractionResult activatedSuper = super.useItemOn(itemStack, blockState, level, pos, player, hand, rayTraceResult);
         if (activatedSuper.consumesAction()) {
             return activatedSuper;
         }
@@ -98,7 +97,7 @@ public class BlockFlopperNeoForge extends BlockFlopper {
                                 FlopperNeoForge._instance.getModHelpers().getInventoryHelpers().tryReAddToStack(player, itemStack, drainedItem, hand);
                             }
                         }
-                        return ItemInteractionResult.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     } else if (player.isCrouching()
                             && FluidUtil.tryFillContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, false).isSuccess()) {
                         // Move fluid from the tank into the item if sneaking
@@ -109,11 +108,11 @@ public class BlockFlopperNeoForge extends BlockFlopper {
                                 FlopperNeoForge._instance.getModHelpers().getInventoryHelpers().tryReAddToStack(player, itemStack, filledItem, hand);
                             }
                         }
-                        return ItemInteractionResult.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     }
-                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                    return InteractionResult.PASS;
                 })
-                .orElse(ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION);
+                .orElse(InteractionResult.PASS);
     }
 
     // A modified/fixed version of FluidUtil#tryEmptyContainer

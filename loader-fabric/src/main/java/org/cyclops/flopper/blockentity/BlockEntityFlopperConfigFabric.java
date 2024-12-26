@@ -17,13 +17,13 @@ public class BlockEntityFlopperConfigFabric extends BlockEntityFlopperConfig<Blo
         super(
                 FlopperFabric._instance,
                 (eConfig) -> new BlockEntityType<>(BlockEntityFlopperFabric::new,
-                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.value()), null)
+                        Sets.newHashSet(RegistryEntries.BLOCK_FLOPPER.value()))
         );
     }
 
     @Override
-    public void onForgeRegistered() {
-        super.onForgeRegistered();
+    public void onRegistryRegistered() {
+        super.onRegistryRegistered();
 
         // Fluid capability
         FluidStorage.SIDED.registerForBlockEntity((blockEntity, direction) -> blockEntity.getTank(), getInstance());

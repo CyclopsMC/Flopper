@@ -1,12 +1,13 @@
 package org.cyclops.flopper.block;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.cyclops.cyclopscore.config.ConfigurablePropertyCommon;
 import org.cyclops.cyclopscore.config.ModConfigLocation;
 import org.cyclops.cyclopscore.config.extendedconfig.BlockConfigCommon;
 import org.cyclops.cyclopscore.init.IModBase;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Config for the {@link BlockFlopper}.
@@ -48,7 +49,7 @@ public class BlockFlopperConfig<M extends IModBase> extends BlockConfigCommon<M>
     @ConfigurablePropertyCommon(category = "machine", comment = "If a status message with the flopper contents should be shown to the player on right click without an item.", isCommandable = true)
     public static boolean showContentsStatusMessageOnClick = true;
 
-    public BlockFlopperConfig(M mod, Function<BlockConfigCommon<M>, ? extends Block> blockConstructor) {
+    public BlockFlopperConfig(M mod, BiFunction<BlockConfigCommon<M>, BlockBehaviour.Properties, ? extends Block> blockConstructor) {
         super(
                 mod,
                 "flopper",

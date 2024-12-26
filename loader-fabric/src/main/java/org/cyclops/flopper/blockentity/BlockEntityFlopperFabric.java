@@ -110,7 +110,7 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
                                 }
                             }
                             if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
-                                level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
+                                level.neighborChanged(worldPosition, Blocks.AIR, null);
                             }
                             return true;
                         }
@@ -144,7 +144,7 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
                             }
                         }
                         if (BlockFlopperConfig.worldPullPushNeighbourEvents) {
-                            level.neighborChanged(worldPosition, Blocks.AIR, worldPosition);
+                            level.neighborChanged(worldPosition, Blocks.AIR, null);
                         }
                         return true;
                     }

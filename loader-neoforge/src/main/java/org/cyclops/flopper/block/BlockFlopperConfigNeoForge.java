@@ -1,9 +1,8 @@
 package org.cyclops.flopper.block;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
-import org.cyclops.cyclopscore.init.ModBase;
+import org.cyclops.cyclopscore.init.ModBaseNeoForge;
 import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
 
@@ -12,12 +11,12 @@ import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
  * @author rubensworks
  *
  */
-public class BlockFlopperConfigNeoForge extends BlockFlopperConfig<ModBase<?>> {
+public class BlockFlopperConfigNeoForge extends BlockFlopperConfig<ModBaseNeoForge<?>> {
 
     public BlockFlopperConfigNeoForge() {
         super(
                 FlopperNeoForge._instance,
-                eConfig -> new BlockFlopperNeoForge(Block.Properties.of()
+                (eConfig, properties) -> new BlockFlopperNeoForge(properties
                         .mapColor(MapColor.STONE)
                         .strength(3.0F, 4.8F)
                         .sound(SoundType.METAL), BlockEntityFlopperNeoForge::new)

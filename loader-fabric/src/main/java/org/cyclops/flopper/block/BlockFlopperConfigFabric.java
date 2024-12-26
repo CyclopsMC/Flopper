@@ -1,7 +1,6 @@
 package org.cyclops.flopper.block;
 
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
 import org.cyclops.cyclopscore.config.ConfigurablePropertyCommon;
@@ -29,7 +28,7 @@ public class BlockFlopperConfigFabric extends BlockFlopperConfig<ModBaseFabric<?
     public BlockFlopperConfigFabric() {
         super(
                 FlopperFabric._instance,
-                eConfig -> new BlockFlopperFabric(Block.Properties.of()
+                (eConfig, properties) -> new BlockFlopperFabric(properties
                         .mapColor(MapColor.STONE)
                         .strength(3.0F, 4.8F)
                         .sound(SoundType.METAL), BlockEntityFlopperFabric::new)

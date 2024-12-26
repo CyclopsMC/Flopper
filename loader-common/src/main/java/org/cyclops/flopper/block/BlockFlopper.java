@@ -5,11 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -18,14 +14,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.cyclops.cyclopscore.block.BlockWithEntityCommon;
-import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntityCommon;
+import org.cyclops.cyclopscore.block.BlockWithEntity;
+import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.IModHelpers;
 import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.blockentity.BlockEntityFlopper;
@@ -37,9 +34,9 @@ import java.util.function.BiFunction;
  * Fluid hopper block.
  * @author rubensworks
  */
-public abstract class BlockFlopper extends BlockWithEntityCommon {
+public abstract class BlockFlopper extends BlockWithEntity {
 
-    public static final DirectionProperty FACING = BlockStateProperties.FACING_HOPPER;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING_HOPPER;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
     // Copied from HopperBlock, to avoid conflicts with other mods messing with the hopper
@@ -59,7 +56,7 @@ public abstract class BlockFlopper extends BlockWithEntityCommon {
     private static final VoxelShape SOUTH_INTERACTION_SHAPE = Shapes.or(INSIDE, Block.box(6.0, 8.0, 12.0, 10.0, 10.0, 16.0));
     private static final VoxelShape WEST_INTERACTION_SHAPE = Shapes.or(INSIDE, Block.box(0.0, 8.0, 6.0, 4.0, 10.0, 10.0));
 
-    public BlockFlopper(BlockBehaviour.Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntityCommon> blockEntitySupplier) {
+    public BlockFlopper(BlockBehaviour.Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.DOWN)
@@ -135,8 +132,8 @@ public abstract class BlockFlopper extends BlockWithEntityCommon {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighbourBlock, @Nullable Orientation orientation, boolean isMoving) {
+        super.neighborChanged(state, worldIn, pos, neighbourBlock, orientation, isMoving);
         this.updateState(worldIn, pos, state);
     }
 
