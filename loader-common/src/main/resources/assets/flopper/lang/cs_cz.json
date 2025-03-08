@@ -1,1 +1,7 @@
-{}
+{
+  "_comment": "Bloky",
+  "itemGroup.flopper": "Tekutinová násypka",
+  "general.flopper.description": "Násypka pro přenos tekutin",
+  "block.flopper.flopper": "Tekutinová násypka",
+  "block.flopper.flopper.info": "Násypka pro přenos tekutin"
+}

@@ -1,1 +1,7 @@
-{}
+{
+  "_comment": "ブロック",
+  "itemGroup.flopper": "フロッパー",
+  "general.flopper.description": "流体を転送するホッパーです",
+  "block.flopper.flopper": "フロッパー",
+  "block.flopper.flopper.info": "流体を転送するホッパーです"
+}
