@@ -7,8 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
@@ -18,6 +16,8 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.cyclopscore.helper.IModHelpersFabric;
 import org.cyclops.flopper.FlopperFabric;
 import org.cyclops.flopper.block.BlockFlopperConfig;
@@ -59,15 +59,15 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
     }
 
     @Override
-    public void read(CompoundTag tag, HolderLookup.Provider provider) {
-        super.read(tag, provider);
-        SingleVariantStorage.readNbt(getTank(), FluidVariant.CODEC, FluidVariant::blank, tag, provider);
+    public void read(ValueInput input) {
+        super.read(input);
+        SingleVariantStorage.readData(getTank(), FluidVariant.CODEC, FluidVariant::blank, input);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        SingleVariantStorage.writeNbt(getTank(), FluidVariant.CODEC, tag, provider);
+    public void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        SingleVariantStorage.writeData(getTank(), FluidVariant.CODEC, output);
     }
 
     @Override

@@ -2,9 +2,9 @@ package org.cyclops.flopper.gametest;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import org.cyclops.cyclopscore.gametest.GameTest;
 import org.cyclops.flopper.Reference;
 import org.cyclops.flopper.RegistryEntries;
 import org.cyclops.flopper.block.BlockFlopper;
@@ -72,7 +73,7 @@ public class GameTestsCommon {
             assertFlopperHasBucket(helper, POS.offset(2, 2, 2));
 
             // Bucket item must be empty
-            assertItemIs(player.getItemInHand(InteractionHand.MAIN_HAND), new ItemStack(Items.BUCKET));
+            assertItemIs(player.getItemInHand(InteractionHand.MAIN_HAND), new ItemStack(Items.BUCKET), helper.getTick());
         });
     }
 
@@ -103,7 +104,7 @@ public class GameTestsCommon {
             assertFlopperIsEmpty(helper, POS.offset(2, 2, 2));
 
             // Bucket item must be filled
-            assertItemIs(player.getItemInHand(InteractionHand.MAIN_HAND), new ItemStack(Items.WATER_BUCKET));
+            assertItemIs(player.getItemInHand(InteractionHand.MAIN_HAND), new ItemStack(Items.WATER_BUCKET), helper.getTick());
         });
     }
 
@@ -295,7 +296,7 @@ public class GameTestsCommon {
             assertFlopperHasBucket(helper, POS.offset(2, 2, 2));
 
             // Bucket item must be empty
-            assertItemIs(player.getItemInHand(InteractionHand.MAIN_HAND), new ItemStack(Items.BUCKET));
+            assertItemIs(player.getItemInHand(InteractionHand.MAIN_HAND), new ItemStack(Items.BUCKET), helper.getTick());
 
             // Water block above flopper must still be there
             helper.assertBlockPresent(Blocks.WATER, POS.offset(2, 3, 2));
@@ -303,16 +304,16 @@ public class GameTestsCommon {
     }
 
     protected void assertFlopperHasBucket(GameTestHelper helper, BlockPos pos) {
-        helper.assertBlockEntityData(pos, BlockEntityFlopper::hasBucket, () -> "Flopper does not contain a bucket");
+        helper.assertBlockEntityData(pos, BlockEntityFlopper.class, BlockEntityFlopper::hasBucket, () -> Component.literal("Flopper does not contain a bucket"));
     }
 
     protected void assertFlopperIsEmpty(GameTestHelper helper, BlockPos pos) {
-        helper.assertBlockEntityData(pos, (BlockEntityFlopper blockEntity) -> blockEntity.getFluidAmount() == 0, () -> "Flopper is not empty");
+        helper.assertBlockEntityData(pos, BlockEntityFlopper.class, (BlockEntityFlopper blockEntity) -> blockEntity.getFluidAmount() == 0, () -> Component.literal("Flopper is not empty"));
     }
 
-    protected void assertItemIs(ItemStack stackExpected, ItemStack stackActual) {
+    protected void assertItemIs(ItemStack stackExpected, ItemStack stackActual, long tick) {
         if (!ItemStack.isSameItemSameComponents(stackExpected, stackActual)) {
-            throw new GameTestAssertException("Expected item is not equal to actual. Expected: " + stackExpected + "; Actual: " + stackActual);
+            throw new GameTestAssertException(Component.literal("Expected item is not equal to actual. Expected: " + stackExpected + "; Actual: " + stackActual), (int) tick);
         }
     }
 

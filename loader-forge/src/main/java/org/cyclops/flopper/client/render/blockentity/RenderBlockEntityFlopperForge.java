@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Triple;
@@ -29,7 +30,7 @@ public class RenderBlockEntityFlopperForge implements BlockEntityRenderer<BlockE
     }
 
     @Override
-    public void render(BlockEntityFlopperForge tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void render(BlockEntityFlopperForge tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, Vec3 cameraPos) {
         if(tile != null) {
             FluidStack fluid = tile.getTank().getFluid();
             IRenderHelpersForge renderHelpers = FlopperForge._instance.getModHelpers().getRenderHelpers();

@@ -90,8 +90,8 @@ public class BlockFlopperFabric extends BlockFlopper {
                 fh.moveFluid(storageFlopper, storageItem, movedSimulate, player, false);
                 return InteractionResult.SUCCESS;
             }
-            return InteractionResult.PASS;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
-        return InteractionResult.PASS;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 }

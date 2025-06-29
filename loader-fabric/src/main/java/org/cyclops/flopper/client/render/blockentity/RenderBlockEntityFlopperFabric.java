@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cyclops.cyclopscore.helper.IRenderHelpersFabric;
 import org.cyclops.flopper.FlopperFabric;
@@ -29,7 +30,7 @@ public class RenderBlockEntityFlopperFabric implements BlockEntityRenderer<Block
     }
 
     @Override
-    public void render(BlockEntityFlopperFabric tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void render(BlockEntityFlopperFabric tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, Vec3 cameraPos) {
         if(tile != null) {
             FluidVariant fluid = tile.getTank().variant;
             long amount = tile.getTank().amount;

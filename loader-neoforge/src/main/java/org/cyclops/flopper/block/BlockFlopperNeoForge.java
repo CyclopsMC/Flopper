@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +19,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -110,9 +110,9 @@ public class BlockFlopperNeoForge extends BlockFlopper {
                         }
                         return InteractionResult.SUCCESS;
                     }
-                    return InteractionResult.PASS;
+                    return InteractionResult.TRY_WITH_EMPTY_HAND;
                 })
-                .orElse(InteractionResult.PASS);
+                .orElse(InteractionResult.TRY_WITH_EMPTY_HAND);
     }
 
     // A modified/fixed version of FluidUtil#tryEmptyContainer

@@ -11,6 +11,7 @@ import org.cyclops.cyclopscore.proxy.IClientProxyCommon;
 import org.cyclops.cyclopscore.proxy.ICommonProxyCommon;
 import org.cyclops.flopper.block.BlockFlopperConfigForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperConfigForge;
+import org.cyclops.flopper.gametest.GameTestsCommon;
 import org.cyclops.flopper.proxy.ClientProxyForge;
 
 /**
@@ -59,5 +60,10 @@ public class FlopperForge extends ModBaseForge<FlopperForge> {
 
         configHandler.addConfigurable(new BlockFlopperConfigForge());
         configHandler.addConfigurable(new BlockEntityFlopperConfigForge());
+    }
+
+    @Override
+    public Class<?>[] getGameTestClasses() {
+        return new Class<?>[] { GameTestsCommon.class };
     }
 }

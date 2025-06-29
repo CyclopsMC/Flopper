@@ -15,13 +15,11 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.common.util.Result;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -46,7 +44,7 @@ public class BlockFlopperForge extends BlockFlopper {
 
     public BlockFlopperForge(Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
-        MinecraftForge.EVENT_BUS.register(this);
+        PlayerInteractEvent.RightClickBlock.BUS.addListener(this::onRightClick);
     }
 
     @Override
@@ -115,9 +113,9 @@ public class BlockFlopperForge extends BlockFlopper {
                         }
                         return InteractionResult.SUCCESS;
                     }
-                    return InteractionResult.PASS;
+                    return InteractionResult.TRY_WITH_EMPTY_HAND;
                 })
-                .orElse(InteractionResult.PASS);
+                .orElse(InteractionResult.TRY_WITH_EMPTY_HAND);
     }
 
     // A modified/fixed version of FluidUtil#tryEmptyContainer
@@ -172,13 +170,12 @@ public class BlockFlopperForge extends BlockFlopper {
         }).orElse(FluidActionResult.FAILURE);
     }
 
-    @SubscribeEvent
     public void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         // Force allow shift-right clicking with a fluid container passing through to this block
         if (!event.getItemStack().isEmpty()
                 && event.getLevel().getBlockState(event.getPos()).getBlock() == this
                 && getFluidHandler(event.getItemStack()).isPresent()) {
-            event.setUseBlock(Event.Result.ALLOW);
+            event.setUseBlock(Result.ALLOW);
         }
     }
 

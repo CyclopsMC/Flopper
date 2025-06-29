@@ -2,10 +2,10 @@ package org.cyclops.flopper.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -13,6 +13,8 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -55,17 +57,17 @@ public class BlockEntityFlopperForge extends BlockEntityFlopper {
     }
 
     @Override
-    public void read(CompoundTag tag, HolderLookup.Provider provider) {
-        super.read(tag, provider);
-        tank.readFromNBT(tag.getCompound("tank"));
+    public void read(ValueInput input) {
+        super.read(input);
+        tank.readFromNBT((CompoundTag) input.read("tank", ExtraCodecs.NBT).orElseThrow());
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    public void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
         CompoundTag tagTank = new CompoundTag();
         tank.writeToNBT(tagTank);
-        tag.put("tank", tagTank);
+        output.store("tank", ExtraCodecs.NBT, tagTank);
     }
 
     @Override

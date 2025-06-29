@@ -9,6 +9,7 @@ import org.cyclops.cyclopscore.proxy.IClientProxyCommon;
 import org.cyclops.cyclopscore.proxy.ICommonProxyCommon;
 import org.cyclops.flopper.block.BlockFlopperConfigFabric;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperConfigFabric;
+import org.cyclops.flopper.gametest.GameTestsCommon;
 import org.cyclops.flopper.proxy.ClientProxyFabric;
 import org.cyclops.flopper.proxy.CommonProxyFabric;
 
@@ -56,5 +57,10 @@ public class FlopperFabric extends ModBaseFabric<FlopperFabric> implements ModIn
 
         configHandler.addConfigurable(new BlockFlopperConfigFabric());
         configHandler.addConfigurable(new BlockEntityFlopperConfigFabric());
+    }
+
+    @Override
+    public Class<?>[] getGameTestClasses() {
+        return new Class<?>[] { GameTestsCommon.class };
     }
 }
