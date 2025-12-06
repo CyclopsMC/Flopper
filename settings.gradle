@@ -34,6 +34,7 @@ pluginManagement {
             }
             filter {
                 includeGroup('net.fabricmc')
+                includeGroupByRegex("net\\.fabricmc\\..*")
                 includeGroup('fabric-loom')
             }
         }
@@ -80,7 +81,7 @@ plugins {
 }
 
 // This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
-rootProject.name = 'Flopper'
+rootProject.name = 'CyclopsCore'
 include('loader-common')
 include('loader-fabric')
 include('loader-neoforge')

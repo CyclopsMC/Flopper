@@ -66,7 +66,7 @@ public abstract class BlockFlopper extends BlockWithEntity {
     @Override
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        return level.isClientSide ? null : BaseEntityBlock.createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_FLOPPER.value(), new BlockEntityFlopper.Ticker());
+        return level.isClientSide() ? null : BaseEntityBlock.createTickerHelper(blockEntityType, RegistryEntries.BLOCK_ENTITY_FLOPPER.value(), new BlockEntityFlopper.Ticker());
     }
 
     @Override
@@ -169,7 +169,7 @@ public abstract class BlockFlopper extends BlockWithEntity {
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos, Direction direction) {
         return IModHelpers.get().getBlockEntityHelpers().get(worldIn, pos, BlockEntityFlopper.class)
                 .map(tile -> tile.getFluidAmount() * 8 / tile.getFluidCapacity())
                 .orElse(0);

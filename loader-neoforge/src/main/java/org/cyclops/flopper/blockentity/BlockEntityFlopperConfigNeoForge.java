@@ -25,7 +25,7 @@ public class BlockEntityFlopperConfigNeoForge extends BlockEntityFlopperConfig<B
 
     public void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
+                Capabilities.Fluid.BLOCK,
                 getInstance(),
                 (blockEntity, context) -> blockEntity.getTank()
         );

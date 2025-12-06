@@ -1,5 +1,6 @@
 package org.cyclops.flopper.blockentity;
 
+import com.google.common.base.Predicates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
@@ -16,9 +17,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.wrappers.BlockWrapper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.resource.ResourceStack;
 import org.cyclops.cyclopscore.fluid.SingleUseTank;
 import org.cyclops.cyclopscore.fluid.Tank;
 import org.cyclops.cyclopscore.helper.IModHelpersNeoForge;
@@ -66,16 +68,16 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
     protected boolean pushFluidsToTank() {
         Direction targetSide = getFacing().getOpposite();
         BlockPos targetPos = getBlockPos().relative(getFacing());
-        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, targetSide, Capabilities.FluidHandler.BLOCK)
-                .map(fluidHandler -> !FluidUtil.tryFluidTransfer(fluidHandler, tank, BlockFlopperConfig.pushFluidRate, true).isEmpty())
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, targetSide, Capabilities.Fluid.BLOCK)
+                .map(fluidHandler -> ResourceHandlerUtil.moveFirst(tank, fluidHandler, Predicates.alwaysTrue(), BlockFlopperConfig.pushFluidRate, null) != null)
                 .orElse(false);
     }
 
     @Override
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
-        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, Direction.DOWN, Capabilities.FluidHandler.BLOCK)
-                .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, Direction.DOWN, Capabilities.Fluid.BLOCK)
+                .map(fluidHandler -> ResourceHandlerUtil.moveFirst(fluidHandler, tank, Predicates.alwaysTrue(), BlockFlopperConfig.pullFluidRate, null) != null)
                 .orElse(false);
     }
 
@@ -90,12 +92,12 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
             FluidStack fluidStack = tank.getFluid();
 
             if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {
-                return getFluidBlockHandler(fluidStack.getFluid(), level, targetPos)
+                return getFluidBlockHandlerForInsertion(fluidStack.getFluid(), level, targetPos)
                         .map(fluidHandler -> {
-                            FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
-                            if (!moved.isEmpty()) {
+                            ResourceStack<FluidResource> moved = ResourceHandlerUtil.moveFirst(tank, fluidHandler, Predicates.alwaysTrue(), Integer.MAX_VALUE, null);
+                            if (moved != null) {
                                 if (BlockFlopperConfig.worldPullPushSounds) {
-                                    SoundEvent soundevent = moved.getFluid().getFluidType().getSound(SoundActions.BUCKET_FILL);
+                                    SoundEvent soundevent = moved.resource().getFluid().getFluidType().getSound(SoundActions.BUCKET_FILL);
                                     if (soundevent != null) {
                                         level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                                     }
@@ -114,24 +116,24 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
         return false;
     }
 
-    private Optional<IFluidHandler> getFluidBlockHandler(Fluid fluid, Level world, BlockPos targetPos) {
+    private Optional<ResourceHandler<FluidResource>> getFluidBlockHandlerForInsertion(Fluid fluid, Level world, BlockPos targetPos) {
         if (!fluid.getFluidType().canBePlacedInLevel(world, targetPos, fluid.defaultFluidState())) {
             return Optional.empty();
         }
         BlockState state = fluid.getFluidType().getBlockForFluidState(world, targetPos, fluid.defaultFluidState());
-        return Optional.of(new BlockWrapper(state, world, targetPos));
+        return Optional.of(new FluidHandlerBlockNeoForgeInsertable(state, world, targetPos));
     }
 
     @Override
     protected boolean pullFluidsFromWorld() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
         BlockState destBlockState = level.getBlockState(targetPos);
-        return wrapFluidBlock(destBlockState, level, targetPos)
+        return wrapFluidBlockForExtraction(destBlockState, level, targetPos)
                 .map(fluidHandler -> {
-                    FluidStack moved = FluidUtil.tryFluidTransfer(tank, fluidHandler, Integer.MAX_VALUE, true);
-                    if (!moved.isEmpty()) {
+                    ResourceStack<FluidResource> moved = ResourceHandlerUtil.moveFirst(fluidHandler, tank, Predicates.alwaysTrue(), Integer.MAX_VALUE, null);
+                    if (moved != null) {
                         if (BlockFlopperConfig.worldPullPushSounds) {
-                            SoundEvent soundevent = moved.getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
+                            SoundEvent soundevent = moved.resource().getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
                             if (soundevent != null) {
                                 level.playSound(null, worldPosition, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                             }
@@ -171,9 +173,9 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
         return getTank().getFluidAmount() == IModHelpersNeoForge.get().getFluidHelpers().getBucketVolume();
     }
 
-    private Optional<IFluidHandler> wrapFluidBlock(BlockState blockState, Level world, BlockPos targetPos) {
+    private Optional<ResourceHandler<FluidResource>> wrapFluidBlockForExtraction(BlockState blockState, Level world, BlockPos targetPos) {
         if (blockState.getBlock() instanceof LiquidBlock || blockState.getBlock() instanceof SimpleWaterloggedBlock) {
-            return Optional.of(new FluidHandlerBlockNeoForge(blockState, world, targetPos));
+            return Optional.of(new FluidHandlerBlockNeoForgeExtractable(blockState, world, targetPos));
         }
         return Optional.empty();
     }

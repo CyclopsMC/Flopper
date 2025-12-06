@@ -61,7 +61,7 @@ public class FluidStorageBlockFabricInsertable extends SingleVariantStorage<Flui
     }
 
     public static void destroyBlockOnFluidPlacement(Level level, BlockPos pos) { // Adapted from Forge's FluidUtil.destroyBlockOnFluidPlacement
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             BlockState destBlockState = level.getBlockState(pos);
             boolean isDestNonSolid = !destBlockState.isSolid();
             if (isDestNonSolid && !destBlockState.liquid()) {

@@ -18,19 +18,18 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.SoundAction;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.fluids.FluidActionResult;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.resource.ResourceStack;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
-import org.cyclops.cyclopscore.helper.IFluidHelpersNeoForge;
 import org.cyclops.flopper.FlopperNeoForge;
 import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 /**
@@ -56,19 +55,20 @@ public class BlockFlopperNeoForge extends BlockFlopper {
             return activatedSuper;
         }
 
-        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, pos, Capabilities.Fluid.BLOCK)
                 .map(fluidHandler -> {
                     if (BlockFlopperConfig.showContentsStatusMessageOnClick) {
                         // If the hand is empty, show the tank contents
-                        FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
-                        if (fluidStack.isEmpty()) {
+                        int amount = fluidHandler.getAmountAsInt(0);
+                        FluidResource fluidResource = fluidHandler.getResource(0);
+                        if (amount == 0) {
                             player.displayClientMessage(Component.literal("0 / "
-                                    + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
+                                    + String.format("%,d", fluidHandler.getCapacityAsLong(0, fluidResource))), true);
                         } else {
-                            player.displayClientMessage(fluidStack.getHoverName().plainCopy()
+                            player.displayClientMessage(fluidResource.getHoverName().plainCopy()
                                     .append(Component.literal(": "
-                                            + String.format("%,d", fluidStack.getAmount()) + " / "
-                                            + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
+                                            + String.format("%,d", amount) + " / "
+                                            + String.format("%,d", fluidHandler.getCapacityAsInt(0, fluidResource)))), true);
                         }
                         return InteractionResult.SUCCESS;
                     }
@@ -84,30 +84,25 @@ public class BlockFlopperNeoForge extends BlockFlopper {
             return activatedSuper;
         }
 
-        IFluidHelpersNeoForge fh = FlopperNeoForge._instance.getModHelpers().getFluidHelpers();
-        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, pos, Capabilities.FluidHandler.BLOCK)
+        ItemAccess itemAccess = ItemAccess.forPlayerInteraction(player, hand).oneByOne();
+        ResourceHandler<FluidResource> fluidHandlerItem = itemAccess.getCapability(Capabilities.Fluid.ITEM);
+        return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, pos, Capabilities.Fluid.BLOCK)
                 .map(fluidHandler -> {
-                    if (!player.isCrouching()
-                            && tryEmptyContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, false).isSuccess()) {
+                    if (!player.isCrouching()) {
                         // Move fluid from the item into the tank if not sneaking
-                        FluidActionResult result = FluidUtil.tryEmptyContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, true);
-                        if (result.isSuccess()) {
-                            ItemStack drainedItem = result.getResult();
-                            if (!player.isCreative()) {
-                                FlopperNeoForge._instance.getModHelpers().getInventoryHelpers().tryReAddToStack(player, itemStack, drainedItem, hand);
-                            }
+                        ResourceStack<FluidResource> moved = ResourceHandlerUtil.moveFirst(fluidHandlerItem, fluidHandler, (fr) -> true, Integer.MAX_VALUE, null);
+                        if (moved == null) {
+                            return InteractionResult.TRY_WITH_EMPTY_HAND;
                         }
+                        playMoveSound(moved, SoundActions.BUCKET_EMPTY, player);
                         return InteractionResult.SUCCESS;
-                    } else if (player.isCrouching()
-                            && FluidUtil.tryFillContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, false).isSuccess()) {
+                    } else if (player.isCrouching()) {
                         // Move fluid from the tank into the item if sneaking
-                        FluidActionResult result = FluidUtil.tryFillContainer(itemStack, fluidHandler, fh.getBucketVolume(), player, true);
-                        if (result.isSuccess()) {
-                            ItemStack filledItem = result.getResult();
-                            if (!player.isCreative()) {
-                                FlopperNeoForge._instance.getModHelpers().getInventoryHelpers().tryReAddToStack(player, itemStack, filledItem, hand);
-                            }
+                        ResourceStack<FluidResource> moved = ResourceHandlerUtil.moveFirst(fluidHandler, fluidHandlerItem, (fr) -> true, Integer.MAX_VALUE, null);
+                        if (moved == null) {
+                            return InteractionResult.TRY_WITH_EMPTY_HAND;
                         }
+                        playMoveSound(moved, SoundActions.BUCKET_FILL, player);
                         return InteractionResult.SUCCESS;
                     }
                     return InteractionResult.TRY_WITH_EMPTY_HAND;
@@ -115,30 +110,11 @@ public class BlockFlopperNeoForge extends BlockFlopper {
                 .orElse(InteractionResult.TRY_WITH_EMPTY_HAND);
     }
 
-    // A modified/fixed version of FluidUtil#tryEmptyContainer
-    // TODO: Remove this once Forge fixes it.
-    @Nonnull
-    public static FluidActionResult tryEmptyContainer(@Nonnull ItemStack container, IFluidHandler fluidDestination, int maxAmount, @Nullable Player player, boolean doDrain)
-    {
-        ItemStack containerCopy = container.copyWithCount(1); // do not modify the input
-        return FluidUtil.getFluidHandler(containerCopy)
-                .map(containerFluidHandler -> {
-                    FluidStack transfer = FluidUtil.tryFluidTransfer(fluidDestination, containerFluidHandler, maxAmount, doDrain);
-                    if (transfer.isEmpty())
-                        return FluidActionResult.FAILURE;
-
-                    if (doDrain && player != null)
-                    {
-                        SoundEvent soundevent = transfer.getFluid().getFluidType().getSound(SoundActions.BUCKET_EMPTY);
-                        if (soundevent != null) {
-                            player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
-                        }
-                    }
-
-                    ItemStack resultContainer = containerFluidHandler.getContainer();
-                    return new FluidActionResult(resultContainer);
-                })
-                .orElse(FluidActionResult.FAILURE);
+    public static void playMoveSound(ResourceStack<FluidResource> fluidStack, SoundAction soundAction, Player player) {
+        SoundEvent soundevent = fluidStack.resource().getFluidType().getSound(soundAction);
+        if (soundevent != null) {
+            player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
     }
 
     @SubscribeEvent
@@ -146,7 +122,7 @@ public class BlockFlopperNeoForge extends BlockFlopper {
         // Force allow shift-right clicking with a fluid container passing through to this block
         if (!event.getItemStack().isEmpty()
                 && event.getLevel().getBlockState(event.getPos()).getBlock() == this
-                && event.getItemStack().getCapability(Capabilities.FluidHandler.ITEM) != null) {
+                && event.getItemStack().getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(event.getItemStack())) != null) {
             event.setUseBlock(TriState.TRUE);
         }
     }

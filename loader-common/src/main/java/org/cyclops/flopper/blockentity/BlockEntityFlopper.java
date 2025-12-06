@@ -76,7 +76,7 @@ public abstract class BlockEntityFlopper extends CyclopsBlockEntity {
         protected void update(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
             super.update(level, pos, blockState, blockEntity);
 
-            if (level != null && !level.isClientSide) {
+            if (level != null && !level.isClientSide()) {
                 blockEntity.setTransferCooldown(blockEntity.getTransferCooldown() - 1);
                 if (!this.isOnTransferCooldown(blockEntity)) {
                     blockEntity.setTransferCooldown(0);
@@ -90,7 +90,7 @@ public abstract class BlockEntityFlopper extends CyclopsBlockEntity {
         }
 
         protected boolean updateHopper(Level level, BlockPos pos, BlockState blockState, BlockEntityFlopper blockEntity) {
-            if (level != null && !level.isClientSide) {
+            if (level != null && !level.isClientSide()) {
                 if (!this.isOnTransferCooldown(blockEntity) && IModHelpers.get().getBlockHelpers().getSafeBlockStateProperty(blockState, BlockFlopper.ENABLED, false)) {
                     boolean worked = false;
                     boolean workedWorld = false;
