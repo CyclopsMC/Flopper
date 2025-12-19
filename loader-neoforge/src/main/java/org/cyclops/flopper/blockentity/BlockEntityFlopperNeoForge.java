@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -91,7 +92,7 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
                 || (isDestNonSolid && isDestReplaceable && !destBlockState.liquid())) {
             FluidStack fluidStack = tank.getFluid();
 
-            if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {
+            if (!level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, targetPos) || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {
                 return getFluidBlockHandlerForInsertion(fluidStack.getFluid(), level, targetPos)
                         .map(fluidHandler -> {
                             ResourceStack<FluidResource> moved = ResourceHandlerUtil.moveFirst(tank, fluidHandler, Predicates.alwaysTrue(), Integer.MAX_VALUE, null);

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -122,7 +123,7 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
     }
 
     private Optional<FluidStorageBlockFabricInsertable> getFluidBlockHandler(Level world, BlockPos targetPos, FluidVariant fluidVariant) {
-        if (world.dimensionType().ultraWarm() && fluidVariant.getFluid().isSame(Fluids.WATER)) {
+        if (world.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, targetPos) && fluidVariant.getFluid().isSame(Fluids.WATER)) {
             return Optional.empty();
         }
         BlockState state = fluidVariant.getFluid().defaultFluidState().createLegacyBlock();

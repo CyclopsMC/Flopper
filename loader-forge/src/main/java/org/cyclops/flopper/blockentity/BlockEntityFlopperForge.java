@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -97,7 +98,7 @@ public class BlockEntityFlopperForge extends BlockEntityFlopper {
                 || (isDestNonSolid && isDestReplaceable && !destBlockState.liquid())) {
             FluidStack fluidStack = tank.getFluid();
 
-            if (!level.dimensionType().ultraWarm() || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {
+            if (!level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, targetPos) || !fluidStack.getFluid().getFluidType().isVaporizedOnPlacement(level, worldPosition, fluidStack)) {
                 return getFluidBlockHandler(fluidStack.getFluid(), level, targetPos)
                         .map(fluidHandler -> {
                             FluidStack moved = FluidUtil.tryFluidTransfer(fluidHandler, tank, Integer.MAX_VALUE, true);
