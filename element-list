@@ -2,5 +2,4 @@ org.cyclops.flopper
 org.cyclops.flopper.block
 org.cyclops.flopper.blockentity
 org.cyclops.flopper.client.render.blockentity
-org.cyclops.flopper.gametest
 org.cyclops.flopper.proxy
