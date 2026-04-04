@@ -65,13 +65,13 @@ public class BlockFlopperForge extends BlockFlopper {
                         // If the hand is empty, show the tank contents
                         FluidStack fluidStack = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
                         if (fluidStack.isEmpty()) {
-                            player.displayClientMessage(Component.literal("0 / "
-                                    + String.format("%,d", fluidHandler.getTankCapacity(0))), true);
+                            player.sendOverlayMessage(Component.literal("0 / "
+                                    + String.format("%,d", fluidHandler.getTankCapacity(0))));
                         } else {
-                            player.displayClientMessage(fluidStack.getDisplayName().plainCopy()
+                            player.sendOverlayMessage(fluidStack.getDisplayName().plainCopy()
                                     .append(Component.literal(": "
                                             + String.format("%,d", fluidStack.getAmount()) + " / "
-                                            + String.format("%,d", fluidHandler.getTankCapacity(0)))), true);
+                                            + String.format("%,d", fluidHandler.getTankCapacity(0)))));
                         }
                         return InteractionResult.SUCCESS;
                     }

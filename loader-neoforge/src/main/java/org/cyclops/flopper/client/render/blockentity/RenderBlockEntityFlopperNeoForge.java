@@ -7,12 +7,10 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cyclops.cyclopscore.helper.IRenderHelpersNeoForge;
@@ -43,7 +41,6 @@ public class RenderBlockEntityFlopperNeoForge implements BlockEntityRenderer<Blo
         if (blockEntity != null) {
             renderState.fluid = blockEntity.getTank().getFluid();
             renderState.capacity = blockEntity.getTank().getCapacity();
-            renderState.level = blockEntity.getLevel();
         }
     }
 
@@ -58,8 +55,7 @@ public class RenderBlockEntityFlopperNeoForge implements BlockEntityRenderer<Blo
             int i3 = brightness & 0xFFFF;
 
             TextureAtlasSprite icon = renderHelpers.getFluidIcon(fluid, Direction.UP);
-            IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid.getFluid());
-            Triple<Float, Float, Float> color = FlopperNeoForge._instance.getModHelpers().getBaseHelpers().intToRGB(renderProperties.getTintColor(fluid.getFluid().defaultFluidState(), renderState.level, renderState.blockPos));
+            Triple<Float, Float, Float> color = renderHelpers.getFluidVertexBufferColor(fluid);
 
             submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.text(icon.atlasLocation()), (pose, vb) -> {
                 vb.addVertex(pose, 0.125F, height, 0.125F).setColor(color.getLeft(), color.getMiddle(), color.getRight(), 1).setUv(icon.getU0(), icon.getV1()).setUv2(l2, i3);
@@ -73,7 +69,6 @@ public class RenderBlockEntityFlopperNeoForge implements BlockEntityRenderer<Blo
     public static class RenderState extends BlockEntityRenderState {
         public FluidStack fluid = FluidStack.EMPTY;
         public int capacity = 0;
-        public BlockAndTintGetter level;
     }
 
 }

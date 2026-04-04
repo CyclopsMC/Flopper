@@ -62,13 +62,13 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
     @Override
     public void read(ValueInput input) {
         super.read(input);
-        SingleVariantStorage.readData(getTank(), FluidVariant.CODEC, FluidVariant::blank, input);
+        SingleVariantStorage.readValue(getTank(), FluidVariant.CODEC, FluidVariant::blank, input);
     }
 
     @Override
     public void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        SingleVariantStorage.writeData(getTank(), FluidVariant.CODEC, output);
+        SingleVariantStorage.writeValue(getTank(), FluidVariant.CODEC, output);
     }
 
     @Override

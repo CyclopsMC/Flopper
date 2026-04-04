@@ -62,13 +62,13 @@ public class BlockFlopperNeoForge extends BlockFlopper {
                         int amount = fluidHandler.getAmountAsInt(0);
                         FluidResource fluidResource = fluidHandler.getResource(0);
                         if (amount == 0) {
-                            player.displayClientMessage(Component.literal("0 / "
-                                    + String.format("%,d", fluidHandler.getCapacityAsLong(0, fluidResource))), true);
+                            player.sendOverlayMessage(Component.literal("0 / "
+                                    + String.format("%,d", fluidHandler.getCapacityAsLong(0, fluidResource))));
                         } else {
-                            player.displayClientMessage(fluidResource.getHoverName().plainCopy()
+                            player.sendOverlayMessage(fluidResource.getHoverName().plainCopy()
                                     .append(Component.literal(": "
                                             + String.format("%,d", amount) + " / "
-                                            + String.format("%,d", fluidHandler.getCapacityAsInt(0, fluidResource)))), true);
+                                            + String.format("%,d", fluidHandler.getCapacityAsInt(0, fluidResource)))));
                         }
                         return InteractionResult.SUCCESS;
                     }

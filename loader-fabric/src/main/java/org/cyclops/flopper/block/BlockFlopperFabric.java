@@ -52,13 +52,13 @@ public class BlockFlopperFabric extends BlockFlopper {
             if (storage != null) {
                 for (StorageView<FluidVariant> view : storage) {
                     if (view.isResourceBlank()) {
-                        player.displayClientMessage(Component.literal("0 / "
-                                + String.format("%,d", view.getCapacity())), true);
+                        player.sendOverlayMessage(Component.literal("0 / "
+                                + String.format("%,d", view.getCapacity())));
                     } else {
-                        player.displayClientMessage(FluidVariantAttributes.getName(view.getResource()).plainCopy()
+                        player.sendOverlayMessage(FluidVariantAttributes.getName(view.getResource()).plainCopy()
                                 .append(Component.literal(": "
                                         + String.format("%,d", view.getAmount()) + " / "
-                                        + String.format("%,d", view.getCapacity()))), true);
+                                        + String.format("%,d", view.getCapacity()))));
                     }
                 }
             }
