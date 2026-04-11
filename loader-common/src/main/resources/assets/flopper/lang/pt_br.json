@@ -1,1 +1,7 @@
-{}
+{
+  "_comment": "Blocks",
+  "itemGroup.flopper": "Flopper",
+  "general.flopper.description": "Um Funil para transferir fluidos",
+  "block.flopper.flopper": "Flopper",
+  "block.flopper.flopper.info": "Um Funil para transferir fluidos"
+}
