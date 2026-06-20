@@ -49,7 +49,7 @@ public class FlopperForge extends ModBaseForge<FlopperForge> {
     @Override
     protected CreativeModeTab.Builder constructDefaultCreativeModeTab(CreativeModeTab.Builder builder) {
         return super.constructDefaultCreativeModeTab(builder)
-                .icon(() -> new ItemStack(RegistryEntries.ITEM_FLOPPER));
+                .icon(() -> new ItemStack(RegistryEntries.ITEM_FLOPPER.getHolder()));
     }
 
     @Override

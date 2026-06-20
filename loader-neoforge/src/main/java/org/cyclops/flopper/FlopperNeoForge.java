@@ -50,7 +50,7 @@ public class FlopperNeoForge extends ModBaseNeoForge<FlopperNeoForge> {
     @Override
     protected CreativeModeTab.Builder constructDefaultCreativeModeTab(CreativeModeTab.Builder builder) {
         return super.constructDefaultCreativeModeTab(builder)
-                .icon(() -> new ItemStack(RegistryEntries.ITEM_FLOPPER));
+                .icon(() -> new ItemStack(RegistryEntries.ITEM_FLOPPER.getHolder()));
     }
 
     @Override
