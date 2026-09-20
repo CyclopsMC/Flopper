@@ -1,6 +1,5 @@
 package org.cyclops.flopper.block;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -11,8 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.SoundActions;
@@ -29,7 +26,6 @@ import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.flopper.FlopperForge;
-import org.cyclops.flopper.blockentity.BlockEntityFlopperForge;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -40,16 +36,9 @@ import java.util.function.BiFunction;
  * @author rubensworks
  */
 public class BlockFlopperForge extends BlockFlopper {
-    public static final MapCodec<BlockFlopper> CODEC = BlockBehaviour.simpleCodec(properties -> new BlockFlopperForge(properties, BlockEntityFlopperForge::new));
-
     public BlockFlopperForge(Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
         PlayerInteractEvent.RightClickBlock.BUS.addListener(this::onRightClick);
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override

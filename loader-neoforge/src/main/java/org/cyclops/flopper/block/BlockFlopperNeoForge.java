@@ -1,6 +1,5 @@
 package org.cyclops.flopper.block;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -11,8 +10,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -28,7 +25,6 @@ import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.resource.ResourceStack;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.flopper.FlopperNeoForge;
-import org.cyclops.flopper.blockentity.BlockEntityFlopperNeoForge;
 
 import java.util.function.BiFunction;
 
@@ -36,16 +32,9 @@ import java.util.function.BiFunction;
  * @author rubensworks
  */
 public class BlockFlopperNeoForge extends BlockFlopper {
-    public static final MapCodec<BlockFlopper> CODEC = BlockBehaviour.simpleCodec(properties -> new BlockFlopperNeoForge(properties, BlockEntityFlopperNeoForge::new));
-
     public BlockFlopperNeoForge(Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
         NeoForge.EVENT_BUS.register(this);
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override
