@@ -93,7 +93,7 @@ public class BlockEntityFlopperForge extends BlockEntityFlopper {
         BlockPos targetPos = getBlockPos().relative(getFacing());
         BlockState destBlockState = level.getBlockState(targetPos);
         final boolean isDestNonSolid = !destBlockState.isSolid();
-        final boolean isDestReplaceable = destBlockState.getPistonPushReaction() == PushReaction.DESTROY;
+        final boolean isDestReplaceable = destBlockState.getPistonPushReaction() == PushReaction.POPPED;
         if (level.isEmptyBlock(targetPos)
                 || (isDestNonSolid && isDestReplaceable && !destBlockState.liquid())) {
             FluidStack fluidStack = tank.getFluid();

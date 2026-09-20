@@ -1,6 +1,5 @@
 package org.cyclops.flopper.block;
 
-import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -14,14 +13,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.cyclops.cyclopscore.blockentity.CyclopsBlockEntity;
 import org.cyclops.cyclopscore.helper.IFluidHelpersFabric;
 import org.cyclops.flopper.FlopperFabric;
-import org.cyclops.flopper.blockentity.BlockEntityFlopperFabric;
 
 import java.util.function.BiFunction;
 
@@ -29,15 +25,8 @@ import java.util.function.BiFunction;
  * @author rubensworks
  */
 public class BlockFlopperFabric extends BlockFlopper {
-    public static final MapCodec<BlockFlopper> CODEC = BlockBehaviour.simpleCodec(properties -> new BlockFlopperFabric(properties, BlockEntityFlopperFabric::new));
-
     public BlockFlopperFabric(Properties properties, BiFunction<BlockPos, BlockState, ? extends CyclopsBlockEntity> blockEntitySupplier) {
         super(properties, blockEntitySupplier);
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Override
