@@ -19,6 +19,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.cyclops.cyclopscore.helper.IFluidHelpersFabric;
 import org.cyclops.cyclopscore.helper.IModHelpersFabric;
 import org.cyclops.flopper.FlopperFabric;
 import org.cyclops.flopper.block.BlockFlopperConfig;
@@ -89,7 +90,10 @@ public class BlockEntityFlopperFabric extends BlockEntityFlopper {
         if (source == null) {
             return false;
         }
-        return FlopperFabric._instance.getModHelpers().getFluidHelpers().moveFluid(source, getTank(), BlockFlopperConfigFabric.pullFluidRateDroplets) > 0;
+        IFluidHelpersFabric fluidHelpers = FlopperFabric._instance.getModHelpers().getFluidHelpers();
+        return fluidHelpers.moveFluid(source, getTank(), BlockFlopperConfigFabric.pullFluidRateDroplets) > 0
+                // Fallback for sources that only allow extracting large increments, such as cauldrons
+                || fluidHelpers.moveFluid(source, getTank(), fluidHelpers.getBucketVolume()) > 0;
     }
 
     @Override
