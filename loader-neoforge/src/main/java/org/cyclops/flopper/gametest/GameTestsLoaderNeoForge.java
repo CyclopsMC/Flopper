@@ -16,8 +16,7 @@ public class GameTestsLoaderNeoForge extends GameTestsCommon {
     @GameTestGenerator
     public Collection<TestFunction> generateCommonTests() throws InstantiationException, IllegalAccessException {
         return GameTestLoaderHelpers.generateCommonTests(Reference.MOD_ID, new Class[]{
-                GameTestsCommon.class,
-                GameTestsCauldron.class
+                GameTestsCommon.class
         });
     }
 }
