@@ -77,7 +77,9 @@ public class BlockEntityFlopperNeoForge extends BlockEntityFlopper {
     protected boolean pullFluidsFromTank() {
         BlockPos targetPos = getBlockPos().relative(Direction.UP);
         return FlopperNeoForge._instance.getModHelpers().getCapabilityHelpers().getCapability(level, targetPos, Direction.DOWN, Capabilities.FluidHandler.BLOCK)
-                .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty())
+                .map(fluidHandler -> !FluidUtil.tryFluidTransfer(tank, fluidHandler, BlockFlopperConfig.pullFluidRate, true).isEmpty()
+                        // Fallback for sources that only allow extracting full buckets, such as cauldrons
+                        || !FluidUtil.tryFluidTransfer(tank, fluidHandler, IModHelpersNeoForge.get().getFluidHelpers().getBucketVolume(), true).isEmpty())
                 .orElse(false);
     }
 
